@@ -1,7 +1,7 @@
 # Caelum: design
 
 Date: 2026-11-27
-Status: draft, waiting for approval
+Status: approved 2026-11-27 (login: L1; GRUB theme: optional, last)
 
 ## Intent
 
@@ -166,7 +166,7 @@ on each screen: the Sukuna wallpaper, a logo and a short animation. It fades
 out as soon as the bar and the wallpaper have drawn their first frame. Writing
 it in Rust/Slint means no extra process and no QML.
 
-## Login screen (owner to decide)
+## Login screen (decided: L1)
 
 SDDM greeters are QML-only, and the greeter process exits after login, so its
 memory doesn't affect the desktop. Two options:
@@ -184,7 +184,7 @@ Also: `/etc/sddm.conf.d/` has several files that each set a different
 `Current=` theme (material-you, panacea, sddm-astronaut-theme, caelestia).
 Whichever option is chosen, that gets consolidated into one file.
 
-## Boot animation (owner to decide on scope)
+## Boot animation (decided: Plymouth; GRUB theme optional, last)
 
 Plymouth isn't installed. The machine boots GRUB, then the kernel with
 `quiet`. Plymouth themes are a script plus images, not Rust. The plan is:
