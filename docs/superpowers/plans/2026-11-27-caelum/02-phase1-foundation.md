@@ -34,16 +34,16 @@ and installs as a user unit.
   - `pub fn load(path: &Path) -> Result<Config, ConfigError>`. A missing file returns `Ok(Config::default())`.
   - `pub fn watch(path: PathBuf, on_change: impl Fn(Config) + Send + 'static) -> Result<WatchHandle, ConfigError>`, using the `notify` crate with a 200ms debounce. On a parse error it logs `warn!` and does **not** call `on_change`.
 
-- [ ] **Step 1: Write failing tests** in `tests/config.rs`:
+- [x] **Step 1: Write failing tests** in `tests/config.rs`:
   - `missing_file_is_default`: `load("/nonexistent")` == `Ok(Config::default())`
   - `defaults_match_caelestia`: `Config::default().border` == `BorderConfig { thickness: 10, rounding: 25, smoothing: 20 }`
   - `partial_file_fills_defaults`: `[border]\nthickness = 4` yields thickness 4, rounding 25
   - `unknown_edge_is_error`: `[bar]\nposition = "middle"` returns `Err`
   - `invalid_reload_keeps_previous`: watch a temp file. Write valid config A, then write `[[[`, then wait 500ms. Exactly one callback has fired, and it carried A.
-- [ ] **Step 2:** `cargo test -p caelum-config` fails (types missing).
-- [ ] **Step 3:** Implement. Write `config.example.toml` with every field at its default and a comment on each.
-- [ ] **Step 4:** `cargo test -p caelum-config` passes.
-- [ ] **Step 5: Commit:** `git commit -m "Config loading and live reload"`
+- [x] **Step 2:** `cargo test -p caelum-config` fails (types missing).
+- [x] **Step 3:** Implement. Write `config.example.toml` with every field at its default and a comment on each.
+- [x] **Step 4:** `cargo test -p caelum-config` passes.
+- [x] **Step 5: Commit:** `git commit -m "Config loading and live reload"`
 
 ### Task 02-3: Theme (`caelum-theme`)
 

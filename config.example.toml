@@ -1,0 +1,26 @@
+# Caelum config: copy to ~/.config/caelum/config.toml.
+# Every key is optional; these are the defaults. Changes apply live.
+
+[wallpaper]
+# Image drawn on every output and used to derive the colour scheme.
+path = "~/Pictures/wallpaper/anime/sukuna-hoodie-3840x2160-26053.jpg"
+# Images the wallpaper rotates through.
+rotation = [
+    "~/Pictures/wallpaper/anime/sukuna-hoodie-3840x2160-26053.jpg",
+    "~/Pictures/wallpaper/anime/sukuna-action-3840x2160-25100.jpg",
+    "~/Pictures/wallpaper/anime/sukuna and raga.jpeg",
+]
+# Dark (true) or light (false) colour scheme.
+dark = true
+
+[border]
+# Width of the frame around each screen, in logical pixels.
+thickness = 10
+# Corner radius of the frame's inner edge.
+rounding = 25
+# Corner smoothing of the frame.
+smoothing = 20
+
+[bar]
+# Screen edge the bar sits on: "top", "bottom", "left" or "right".
+position = "bottom"
