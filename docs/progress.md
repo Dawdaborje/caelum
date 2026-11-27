@@ -5,7 +5,7 @@ Task-level tracker. Step checkboxes live in the plan files under
 commit that finishes it, adding the short SHA.
 
 ## Phase 0: Spike (`01-phase0-spike.md`)
-- [x] 0-1 Measurement and nested-test tools
+- [x] 0-1 Measurement and nested-test tools (8f36ab6)
 - [ ] 0-2 Spike: Slint bar on layer-shell + ADR 0001
 
 ## Phase 1a: Foundation (`02-phase1-foundation.md`)
