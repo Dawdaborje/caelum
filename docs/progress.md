@@ -12,7 +12,7 @@ commit that finishes it, adding the short SHA.
 - [x] 02-1 Workspace skeleton (b970f8d)
 - [x] 02-2 Config (e463577)
 - [x] 02-3 Theme (f1dcfe7)
-- [ ] 02-4 Surfaces and outputs
+- [x] 02-4 Surfaces and outputs (2813c62)
 - [ ] 02-5 Shell window, wallpaper and border frame
 - [ ] 02-6 User unit and switch scripts
 
