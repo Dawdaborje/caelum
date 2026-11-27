@@ -5,3 +5,11 @@ version.workspace = true
 edition.workspace = true
 license.workspace = true
 publish.workspace = true
+
+[dependencies]
+image = { version = "0.25", default-features = false, features = ["png", "jpeg"] }
+material-colors = { version = "0.4", features = ["image"] }
+tracing = "0.1.44"
+
+[dev-dependencies]
+tempfile = "3.27.0"

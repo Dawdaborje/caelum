@@ -59,15 +59,15 @@ and installs as a user unit.
   - `pub fn scheme_or_fallback(path: &Path, dark: bool) -> Scheme`, which logs `warn!` on error.
   - `pub mod tokens`: sizes come from `Config`, so this module holds only the **animation curves and durations** copied from `~/caelestia/shell/plugin/src/Caelestia/Config/anim.cpp`, as `pub struct Curve { pub x1: f32, pub y1: f32, pub x2: f32, pub y2: f32 }` constants named after Caelestia's (`EMPHASIZED`, `EMPHASIZED_ACCEL`, `EMPHASIZED_DECEL`, `STANDARD`, `STANDARD_ACCEL`, `STANDARD_DECEL`, `EXPRESSIVE_FAST_SPATIAL`, `EXPRESSIVE_DEFAULT_SPATIAL`, `EXPRESSIVE_SLOW_SPATIAL`, `EXPRESSIVE_FAST_EFFECTS`, `EXPRESSIVE_DEFAULT_EFFECTS`, `EXPRESSIVE_SLOW_EFFECTS`) and `pub const DURATIONS: Durations { small, normal, large, extra_large, expressive_fast_spatial, expressive_default_spatial, expressive_slow_spatial, expressive_fast_effects, expressive_default_effects, expressive_slow_effects: u32 /*ms*/ }`, the same fields as `AnimDurations` in `Config/appearanceconfig.hpp` (its getters in the matching `.cpp` hold the values). If Caelestia's curve is a multi-segment `QEasingCurve::BezierSpline`, keep every segment: `pub struct Curve(pub &'static [[f32; 6]])`.
 
-- [ ] **Step 1: Write failing tests:**
+- [x] **Step 1: Write failing tests:**
   - `red_image_gives_reddish_primary`: hue of `scheme_from_image(red.png, true).primary` is within 30° of 6° (#c0392b's hue)
   - `missing_wallpaper_uses_fallback`: `scheme_or_fallback("/nope.jpg", true)` == `Scheme::fallback(true)`
   - `dark_and_light_differ`: `surface` luminance is lower in dark than in light for the same image
   - `curves_match_caelestia`: `EMPHASIZED_DECEL` equals the control points in `anim.cpp` (the test hard-codes the values the implementer copied, with a comment citing the line)
-- [ ] **Step 2:** `cargo test -p caelum-theme` fails.
-- [ ] **Step 3:** Implement with the `material-colors` crate (`theme_from_source_color`, picking the source with its `score`/quantizer).
-- [ ] **Step 4:** Tests pass. Also run `cargo run -p caelum-theme --example dump -- ~/Pictures/wallpaper/anime/sukuna-hoodie-3840x2160-26053.jpg` (write this 10-line example), which prints the scheme as hex. Paste the output into `docs/sukuna-scheme.md`: phases 4 and 5 use those values.
-- [ ] **Step 5: Commit:** `git commit -m "Material You scheme from wallpaper; Caelestia animation tokens"`
+- [x] **Step 2:** `cargo test -p caelum-theme` fails.
+- [x] **Step 3:** Implement with the `material-colors` crate (`theme_from_source_color`, picking the source with its `score`/quantizer).
+- [x] **Step 4:** Tests pass. Also run `cargo run -p caelum-theme --example dump -- ~/Pictures/wallpaper/anime/sukuna-hoodie-3840x2160-26053.jpg` (write this 10-line example), which prints the scheme as hex. Paste the output into `docs/sukuna-scheme.md`: phases 4 and 5 use those values.
+- [x] **Step 5: Commit:** `git commit -m "Material You scheme from wallpaper; Caelestia animation tokens"`
 
 ### Task 02-4: Surfaces and outputs (`caelum-wayland`)
 
