@@ -14,9 +14,9 @@ and installs as a user unit.
 **Files:**
 - Create: `Cargo.toml` (workspace, `resolver = "2"`, members `crates/*`), `crates/{caelum-shell,caelum-ui,caelum-wayland,caelum-services,caelum-theme,caelum-config}/Cargo.toml` + `src/lib.rs` (`main.rs` for shell), `rust-toolchain.toml` (`channel = "stable"`), `.github/workflows/ci.yml` (fmt, clippy `-D warnings`, test)
 
-- [ ] **Step 1:** Create the crates. `caelum-ui` has a `build.rs` that calls `slint_build::compile("ui/main.slint")`, with a stub `export component Root inherits Window {}` in `ui/main.slint`.
-- [ ] **Step 2: Verify:** `cargo build --workspace && cargo clippy --workspace -- -D warnings && cargo fmt --check` all exit 0.
-- [ ] **Step 3: Commit:** `git commit -m "Workspace skeleton"`
+- [x] **Step 1:** Create the crates. `caelum-ui` has a `build.rs` that calls `slint_build::compile("ui/main.slint")`, with a stub `export component Root inherits Window {}` in `ui/main.slint`.
+- [x] **Step 2: Verify:** `cargo build --workspace && cargo clippy --workspace -- -D warnings && cargo fmt --check` all exit 0.
+- [x] **Step 3: Commit:** `git commit -m "Workspace skeleton"`
 
 ### Task 02-2: Config (`caelum-config`)
 
