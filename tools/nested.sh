@@ -17,8 +17,9 @@ kwin_cfg=$(mktemp -d)
 kwin_pid=
 dbus_pid=
 cleanup() {
-    [[ -n $kwin_pid ]] && kill "$kwin_pid" 2>/dev/null && wait "$kwin_pid" 2>/dev/null
-    [[ -n $dbus_pid ]] && kill "$dbus_pid" 2>/dev/null
+    # || true: under set -e a non-zero wait would abort the rest of cleanup.
+    [[ -n $kwin_pid ]] && kill "$kwin_pid" 2>/dev/null && wait "$kwin_pid" 2>/dev/null || true
+    [[ -n $dbus_pid ]] && kill "$dbus_pid" 2>/dev/null || true
     rm -rf "$wrapper" "$kwin_cfg"
 }
 trap cleanup EXIT
@@ -46,7 +47,9 @@ printf '[Plugins]\nkwin_workspace_trackerEnabled=false\n' > "$kwin_cfg/kwinrc"
 } > "$wrapper"
 chmod +x "$wrapper"
 
-XDG_CONFIG_HOME=$kwin_cfg kwin_wayland --width 1600 --height 900 --output-count "$outputs" \
+# no-new-privs drops kwin_wayland's cap_sys_nice. Otherwise it makes itself realtime,
+# and a terminal with a hard RLIMIT_RTTIME (rtkit gives Ghostty 200ms) gets it SIGKILLed.
+XDG_CONFIG_HOME=$kwin_cfg setpriv --no-new-privs kwin_wayland --width 1600 --height 900 --output-count "$outputs" \
     --no-lockscreen --no-global-shortcuts --exit-with-session "$wrapper" &
 kwin_pid=$!
 wait "$kwin_pid" || true
