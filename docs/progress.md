@@ -9,7 +9,7 @@ commit that finishes it, adding the short SHA.
 - [x] 0-2 Spike: Slint bar on layer-shell + ADR 0001 (99ead18)
 
 ## Phase 1a: Foundation (`02-phase1-foundation.md`)
-- [ ] 02-1 Workspace skeleton
+- [x] 02-1 Workspace skeleton (b970f8d)
 - [ ] 02-2 Config
 - [ ] 02-3 Theme
 - [ ] 02-4 Surfaces and outputs
