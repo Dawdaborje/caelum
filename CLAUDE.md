@@ -38,3 +38,8 @@ model.** Then:
 
 A session that starts from a handoff reads `docs/handoff.md` first. Once it
 has taken over, it deletes the file in its first commit.
+
+## Progress
+
+`docs/progress.md` tracks tasks done. When a task's final commit lands, tick
+it there (with the short SHA) in that same commit.
