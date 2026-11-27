@@ -82,13 +82,13 @@ and installs as a user unit.
   - `pub struct LayerSpec { pub namespace: &'static str, pub layer: Layer, pub anchors: Anchors, pub size: (u32, u32), pub exclusive_zone: i32, pub keyboard: KeyboardMode, pub input_region: InputRegion }` with `Layer { Background, Bottom, Top, Overlay }`, `KeyboardMode { None, OnDemand, Exclusive }` and `InputRegion { Full, Empty, Rects(Vec<(i32,i32,i32,i32)>) }`
   - `pub fn create_layer_window(output_id: u32, spec: LayerSpec) -> Result<slint::Window-backed handle, WaylandError>`. The exact return type is whatever the ADR route gives; name it `LayerWindow` and give it `fn set_exclusive_zone(&self, i32)`, `fn set_input_region(&self, InputRegion)`, `fn set_size(&self, u32, u32)`, `fn slint_window(&self) -> &slint::Window`.
   - `pub struct OutputTracker`, a pure state machine fed by Wayland events, with `fn apply(&mut self, ev: OutputEvent) -> Vec<SurfaceAction>` where `enum SurfaceAction { Create(u32), Destroy(u32), Resize(u32) }`. It is kept pure so it can be tested without a compositor.
-- [ ] **Step 1: Write failing tests** for `OutputTracker` only:
+- [x] **Step 1: Write failing tests** for `OutputTracker` only:
   - `added_creates_once`: Added(1) twice gives `[Create(1)]` then `[]`
   - `outputs_removed_drops_surfaces`: Added(1), Added(2), Removed(1) ends with `[Destroy(1)]`
   - `changed_resizes`: Added(1), then Changed(1 with new width), gives `[Resize(1)]`
-- [ ] **Step 2:** Tests fail. **Step 3:** Implement `OutputTracker`, then the Wayland side from the spike's code (refactored, no longer throwaway).
-- [ ] **Step 4:** Tests pass. **Manual check:** under `tools/nested.sh --outputs 2`, a debug example creates one 1×1 transparent `Top` surface per output and logs Added/Removed.
-- [ ] **Step 5: Commit:** `git commit -m "Layer surfaces and output tracking"`
+- [x] **Step 2:** Tests fail. **Step 3:** Implement `OutputTracker`, then the Wayland side from the spike's code (refactored, no longer throwaway).
+- [x] **Step 4:** Tests pass. **Manual check:** under `tools/nested.sh --outputs 2`, a debug example creates one 1×1 transparent `Top` surface per output and logs Added/Removed.
+- [x] **Step 5: Commit:** `git commit -m "Layer surfaces and output tracking"`
 
 ### Task 02-5: Shell window, wallpaper and border frame
 
