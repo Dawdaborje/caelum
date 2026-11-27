@@ -6,7 +6,7 @@ commit that finishes it, adding the short SHA.
 
 ## Phase 0: Spike (`01-phase0-spike.md`)
 - [x] 0-1 Measurement and nested-test tools (8f36ab6)
-- [ ] 0-2 Spike: Slint bar on layer-shell + ADR 0001
+- [x] 0-2 Spike: Slint bar on layer-shell + ADR 0001 (99ead18)
 
 ## Phase 1a: Foundation (`02-phase1-foundation.md`)
 - [ ] 02-1 Workspace skeleton

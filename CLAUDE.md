@@ -42,4 +42,5 @@ has taken over, it deletes the file in its first commit.
 ## Progress
 
 `docs/progress.md` tracks tasks done. When a task's final commit lands, tick
-it there (with the short SHA) in that same commit.
+it there with that commit's short SHA, in a follow-up commit (a commit cannot
+contain its own SHA).
