@@ -1,0 +1,24 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Throwaway Phase 0 spike: Slint bar on a layer-shell surface.
+# Route 1 (spell-framework) failed: does not build against Slint 1.19. See docs/adr/0001.
+# Binaries: caelum-spike (route 3, software) and route2 (FemtoVG on EGL).
+[package]
+name = "caelum-spike"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+slint = { version = "1.19", default-features = false, features = ["std", "compat-1-2", "renderer-femtovg", "renderer-software"] }
+smithay-client-toolkit = { version = "0.21", default-features = false, features = ["calloop"] }
+wayland-backend = { version = "0.3", features = ["client_system"] }
+glutin = { version = "0.32", default-features = false, features = ["egl", "wayland"] }
+raw-window-handle = "0.6"
+material-colors = { version = "0.4", features = ["image"] }
+chrono = { version = "0.4", default-features = false, features = ["clock"] }
+
+[build-dependencies]
+slint-build = "1.19"
+
+[profile.release]
+strip = true

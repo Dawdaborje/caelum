@@ -1,0 +1,11 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+export component Bar inherits Window {
+    in property <color> bg;
+    in property <string> time;
+    background: bg;
+    Text {
+        text: time;
+        color: white;
+        font-size: 16px;
+    }
+}
