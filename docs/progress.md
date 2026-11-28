@@ -25,7 +25,7 @@ commit that finishes it, adding the short SHA.
 - [x] 03-6 Bar memory check (b227938)
 
 ## Phase 1c: Launcher, notifications, OSD (`04-phase1-launcher-notifs-osd.md`)
-- [ ] 04-1 Shell D-Bus interface and global shortcuts
+- [x] 04-1 Shell D-Bus interface and global shortcuts (32bff58)
 - [ ] 04-2 Drawer mechanics and launcher
 - [ ] 04-3 Notification server and popups
 - [ ] 04-4 OSD
