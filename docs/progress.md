@@ -21,7 +21,7 @@ commit that finishes it, adding the short SHA.
 - [x] 03-2 Workspaces and active window (4fe75e6)
 - [x] 03-3 Clock and OS icon (79a16d8)
 - [x] 03-4 Tray (e6c8df3)
-- [ ] 03-5 Status icons
+- [x] 03-5 Status icons (af6ec26)
 - [ ] 03-6 Bar memory check
 
 ## Phase 1c: Launcher, notifications, OSD (`04-phase1-launcher-notifs-osd.md`)
