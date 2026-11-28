@@ -1,24 +1,37 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! The one background thread: a current-thread tokio runtime running every
 //! service, forwarding each state change to the UI thread.
-use caelum_services::{Service, ServiceError, kwin::KwinService};
-use tokio::sync::watch;
+use std::{future::Future, sync::OnceLock};
+
+use caelum_services::{Service, ServiceError, kwin::KwinService, tray::TrayService};
+use tokio::{runtime::Handle, sync::watch};
 
 use crate::app;
 
+static HANDLE: OnceLock<Handle> = OnceLock::new();
+
 pub fn start() -> std::io::Result<()> {
     let rt = tokio::runtime::Builder::new_current_thread()
-        .enable_io()
+        .enable_all()
         .build()?;
+    let _ = HANDLE.set(rt.handle().clone());
     std::thread::Builder::new()
         .name("caelum-services".into())
         .spawn(move || {
             rt.block_on(async {
                 spawn(KwinService, app::on_kwin);
+                spawn(TrayService::default(), app::on_tray);
                 std::future::pending::<()>().await
             })
         })?;
     Ok(())
+}
+
+/// Runs a one-off request (a click's D-Bus call) on the services thread.
+pub fn run(task: impl Future<Output = ()> + Send + 'static) {
+    if let Some(h) = HANDLE.get() {
+        h.spawn(task);
+    }
 }
 
 /// Runs `service` and calls `on_change` on the UI thread with every new state.

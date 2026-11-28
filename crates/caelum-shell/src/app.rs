@@ -3,14 +3,15 @@
 use std::{cell::RefCell, collections::HashMap, path::Path};
 
 use caelum_config::Config;
-use caelum_services::kwin::KwinState;
+use caelum_config::Edge;
+use caelum_services::{kwin::KwinState, tray::TrayState};
 use caelum_theme::{Scheme, scheme_or_fallback};
 use caelum_ui::{Background, Bar, Border, Exclusion};
 use caelum_wayland::{
     Anchors, InputRegion, KeyboardMode, Layer, LayerSpec, LayerWindow, OutputEvent, OutputInfo,
     OutputTracker, SurfaceAction, WaylandError, create_layer_window,
 };
-use slint::{ComponentHandle, Image, Rgb8Pixel, SharedPixelBuffer};
+use slint::{ComponentHandle, Image, ModelRc, Rgb8Pixel, SharedPixelBuffer, VecModel};
 
 use crate::{bar, theme_bridge};
 
@@ -40,6 +41,8 @@ pub struct App {
     wallpapers: HashMap<(u32, u32), Image>,
     /// Latest workspaces and active window; None until (or unless) KWin reports.
     kwin: Option<KwinState>,
+    /// Latest tray items; None while the tray service is unavailable.
+    tray: Option<TrayState>,
     os_logo: Image,
 }
 
@@ -52,6 +55,7 @@ pub fn init(cfg: Config) {
         outputs: HashMap::new(),
         wallpapers: HashMap::new(),
         kwin: None,
+        tray: None,
         os_logo: bar::os_logo(),
     };
     APP.with(|a| *a.borrow_mut() = Some(app));
@@ -138,6 +142,64 @@ pub fn clock_seconds() -> bool {
     seconds
 }
 
+pub fn on_tray(state: Option<TrayState>) {
+    with_app(|app| {
+        app.tray = state;
+        let entries = app
+            .tray
+            .as_ref()
+            .map(crate::tray::entries)
+            .unwrap_or_default();
+        for o in app.outputs.values() {
+            o.edges
+                .bar
+                .1
+                .set_tray_items(ModelRc::new(VecModel::from(entries.clone())));
+        }
+    });
+}
+
+pub fn tray_menu_only(service: &str) -> bool {
+    let mut only = false;
+    with_app(|app| {
+        only = app
+            .tray
+            .as_ref()
+            .is_some_and(|t| t.items.iter().any(|i| i.service == service && i.menu_only))
+    });
+    only
+}
+
+/// A point on the bar in output coordinates, `along` it from its start: what
+/// tray items get as the click position.
+/// shortcut: output-local; KDE apps ignore it, and global layout is not tracked.
+pub fn bar_point(output: u32, along: f32) -> (i32, i32) {
+    let mut point = (0, 0);
+    with_app(|app| {
+        let Some(info) = app.tracker.info(output) else {
+            return;
+        };
+        let half = theme_bridge::bar_thickness(&app.cfg) as i32 / 2;
+        let along = along as i32;
+        point = match app.cfg.bar.position {
+            Edge::Top => (along, half),
+            Edge::Bottom => (along, info.height - half),
+            Edge::Left => (half, along),
+            Edge::Right => (info.width - half, along),
+        };
+    });
+    point
+}
+
+/// Applies the current colour scheme to a window created outside `App`.
+pub fn apply_theme<C>(ui: &C)
+where
+    C: ComponentHandle,
+    for<'a> caelum_ui::Theme<'a>: slint::Global<'a, C>,
+{
+    with_app(|app| theme_bridge::apply(ui, &app.scheme, &app.cfg));
+}
+
 pub fn on_kwin(state: Option<KwinState>) {
     with_app(|app| {
         app.kwin = state;
@@ -200,6 +262,13 @@ impl App {
         if let (Some(o), Some(info)) = (self.outputs.get(&id), self.tracker.info(id)) {
             let b = &o.edges.bar.1;
             b.set_os_logo(self.os_logo.clone());
+            b.set_show_tray(self.cfg.bar.tray);
+            let entries = self
+                .tray
+                .as_ref()
+                .map(crate::tray::entries)
+                .unwrap_or_default();
+            b.set_tray_items(ModelRc::new(VecModel::from(entries)));
             bar::update(b, &self.cfg, self.kwin.as_ref(), &info.name);
         }
     }

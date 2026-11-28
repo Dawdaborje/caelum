@@ -8,6 +8,15 @@ publish.workspace = true
 
 [dependencies]
 caelum-wayland = { path = "../caelum-wayland" }
-tokio = { version = "1", features = ["rt", "net", "sync"] }
+tokio = { version = "1", features = ["rt", "net", "sync", "macros"] }
 wayland-client = "0.31"
 tracing = "0.1"
+futures-util = { version = "0.3", default-features = false }
+serde = { version = "1", features = ["derive"] }
+zbus = { version = "5", default-features = false, features = ["tokio"] }
+freedesktop-icons = "0.4"
+resvg = { version = "0.49", default-features = false }
+image = { version = "0.25", default-features = false, features = ["png"] }
+
+[dev-dependencies]
+tokio = { version = "1", features = ["rt", "macros", "time"] }

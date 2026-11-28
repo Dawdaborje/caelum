@@ -1,0 +1,52 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+import { Theme } from "../theme.slint";
+
+export struct TrayEntry {
+    service: string,
+    title: string,
+    icon: image,
+}
+
+// Caelestia's bar Tray without its background or overflow: 24px app icons
+// (icon.small 15pt * 1.33 * bar icon scale 1.2), spacing.small apart, each in a
+// bar-thick slot. Left click activates, right click opens the menu, middle
+// click runs the secondary action; `pos` is the icon's centre along the bar.
+// shortcut: no hover name, overflow box, drag reordering or recolour.
+export component Tray {
+    in property <[TrayEntry]> items;
+    in property <bool> horizontal: true;
+    callback activate(string, length);
+    callback secondary(string, length);
+    callback menu(string, length);
+
+    property <length> icon: 24px;
+    property <length> gap: 8px;
+    property <length> length: max(0, root.items.length * (root.icon + root.gap) - root.gap);
+    width: root.horizontal ? root.length : 40px;
+    height: root.horizontal ? 40px : root.length;
+
+    for item[i] in root.items: Rectangle {
+        property <length> offset: i * (root.icon + root.gap);
+        property <length> centre: (root.horizontal ? root.x : root.y) + self.offset + root.icon / 2;
+        x: root.horizontal ? self.offset : (root.width - root.icon) / 2;
+        y: root.horizontal ? (root.height - root.icon) / 2 : self.offset;
+        width: root.icon;
+        height: root.icon;
+        Image {
+            width: 100%;
+            height: 100%;
+            source: item.icon;
+            image-fit: contain;
+        }
+        TouchArea {
+            clicked => { root.activate(item.service, parent.centre); }
+            pointer-event(e) => {
+                if e.kind == PointerEventKind.down && e.button == PointerEventButton.right {
+                    root.menu(item.service, parent.centre);
+                } else if e.kind == PointerEventKind.down && e.button == PointerEventButton.middle {
+                    root.secondary(item.service, parent.centre);
+                }
+            }
+        }
+    }
+}

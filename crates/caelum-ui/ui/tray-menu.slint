@@ -1,0 +1,136 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+import { Theme, Edge } from "theme.slint";
+import { Icons } from "icons.slint";
+
+export struct MenuRow {
+    id: int,
+    label: string,
+    enabled: bool,
+    submenu: bool,
+}
+
+export struct MenuGroup {
+    rows: [MenuRow],
+}
+
+// A tray item's context menu, styled as Caelestia's TrayMenu: one
+// surface-container card per separator-delimited group, body.medium labels,
+// a chevron on submenus and a Back pill inside one. The window covers the
+// whole output, transparent, so a click outside the card (or Escape) closes it.
+// shortcut: no entry icons or toggle marks, no open/close animation; it floats
+// beside the bar rather than growing out of it like Caelestia's popouts.
+export component TrayMenu inherits Window {
+    background: transparent;
+    in property <[MenuGroup]> groups;
+    in property <bool> submenu;
+    // Where the item sits along the bar, in this window's coordinates.
+    in property <length> anchor;
+    callback clicked(MenuRow);
+    callback back();
+    callback dismiss();
+
+    property <length> gap: 8px;
+    property <length> pad: 12px;
+    property <length> row-height: 14px * 4 / 3 * 1.4;
+    property <length> card-width: 300px;
+    property <length> font: 14px * 4 / 3;
+    property <bool> horizontal: Theme.bar-position == Edge.top || Theme.bar-position == Edge.bottom;
+
+    TouchArea {
+        clicked => { root.dismiss(); }
+    }
+    keys := FocusScope {
+        init => { self.focus(); }
+        key-pressed(e) => {
+            if e.text == Key.Escape { root.dismiss(); return accept; }
+            reject
+        }
+    }
+
+    card := VerticalLayout {
+        spacing: root.gap;
+        x: root.horizontal
+            ? max(root.gap, min(root.width - self.preferred-width - root.gap, root.anchor - self.preferred-width / 2))
+            : Theme.bar-position == Edge.left ? Theme.bar-thickness + root.gap
+            : root.width - Theme.bar-thickness - root.gap - self.preferred-width;
+        y: !root.horizontal
+            ? max(root.gap, min(root.height - self.preferred-height - root.gap, root.anchor - self.preferred-height / 2))
+            : Theme.bar-position == Edge.top ? Theme.bar-thickness + root.gap
+            : root.height - Theme.bar-thickness - root.gap - self.preferred-height;
+        width: self.preferred-width;
+        height: self.preferred-height;
+
+        if root.submenu: HorizontalLayout {
+            alignment: start;
+            Rectangle {
+                height: root.row-height + 8px;
+                width: back-row.preferred-width + 24px;
+                border-radius: self.height / 2;
+                background: back-touch.has-hover ? Theme.secondary-container.mix(Theme.on-secondary-container, 0.92) : Theme.secondary-container;
+                back-row := HorizontalLayout {
+                    padding-left: 8px;
+                    spacing: 2px;
+                    Text {
+                        text: Icons.chevron-left;
+                        font-family: Icons.family;
+                        font-size: 18px * 4 / 3;
+                        color: Theme.on-secondary-container;
+                        vertical-alignment: center;
+                    }
+                    Text {
+                        text: "Back";
+                        font-size: root.font;
+                        color: Theme.on-secondary-container;
+                        vertical-alignment: center;
+                    }
+                }
+                back-touch := TouchArea {
+                    clicked => { root.back(); }
+                }
+            }
+        }
+
+        for group in root.groups: Rectangle {
+            border-radius: 12px;
+            background: Theme.surface-container;
+            width: root.card-width + 2 * root.pad;
+            height: rows.preferred-height + 2 * root.pad;
+            // Swallows clicks on the card itself, which would otherwise close it.
+            TouchArea { }
+            rows := VerticalLayout {
+                x: root.pad;
+                y: root.pad;
+                width: root.card-width;
+                spacing: root.gap;
+                for row in group.rows: Rectangle {
+                    height: root.row-height;
+                    border-radius: self.height / 2;
+                    background: touch.has-hover && row.enabled ? Theme.on-surface.with-alpha(0.08) : transparent;
+                    HorizontalLayout {
+                        padding-left: 8px;
+                        padding-right: 8px;
+                        Text {
+                            text: row.label;
+                            font-size: root.font;
+                            overflow: elide;
+                            color: row.enabled ? Theme.on-surface : Theme.on-surface-variant;
+                            vertical-alignment: center;
+                            horizontal-stretch: 1;
+                        }
+                        if row.submenu: Text {
+                            text: Icons.chevron-right;
+                            font-family: Icons.family;
+                            font-size: 18px * 4 / 3;
+                            color: row.enabled ? Theme.on-surface : Theme.on-surface-variant;
+                            vertical-alignment: center;
+                        }
+                    }
+                    touch := TouchArea {
+                        enabled: row.enabled;
+                        clicked => { root.clicked(row); }
+                    }
+                }
+            }
+        }
+    }
+}

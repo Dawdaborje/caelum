@@ -4,6 +4,7 @@ mod bar;
 mod clock;
 mod services;
 mod theme_bridge;
+mod tray;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::init();

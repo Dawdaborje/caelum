@@ -2,6 +2,7 @@
 //! Background services. Each runs on the shell's one tokio runtime and publishes
 //! its state through a `watch` channel; `None` means its module is hidden.
 pub mod kwin;
+pub mod tray;
 
 pub trait Service: Send + 'static {
     type State: Clone + Send + Sync + 'static;

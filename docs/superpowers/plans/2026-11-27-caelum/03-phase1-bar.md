@@ -79,11 +79,11 @@ low). It forwards `watch` changes to Slint with `slint::invoke_from_event_loop`.
 
 **Interfaces:**
 - Produces: `TrayState { items: Vec<TrayItem> }`, with `TrayItem { service: String, id: String, title: String, icon: TrayIcon, status: Status }` and `enum TrayIcon { Name(String), Pixmap { w: u32, h: u32, argb: Arc<[u8]> } }`. `TrayService` registers as `org.kde.StatusNotifierWatcher` if no watcher exists (Plasma provides one, so normally it's a host on the existing watcher). `async fn activate(service, x, y)`, `async fn secondary_activate`, and `async fn menu(service) -> Menu` via `com.canonical.dbusmenu`. Icon names resolve through `freedesktop-icons`, **pixmaps are scaled to the bar icon size once and cached per item**, never kept at full size.
-- [ ] **Step 1: Write failing tests** using a fake SNI item on a private `zbus` session (`zbus::connection::Builder::session` with a test-only bus via `dbus-daemon --session --print-address` started in the test):
+- [x] **Step 1: Write failing tests** using a fake SNI item on a private `zbus` session (`zbus::connection::Builder::session` with a test-only bus via `dbus-daemon --session --print-address` started in the test):
   - `item_appears_and_disappears`: register a fake item, so `items.len()` == 1; drop its connection, so 0
   - `pixmap_is_downscaled`: a fake 256×256 pixmap is stored at the bar icon size
-- [ ] **Step 2–4:** Fail, implement, pass. Nested check with `nm-applet` or any tray app: the icon shows, a left click activates it, a right click shows the menu (a Slint popup styled like Caelestia's tray menu).
-- [ ] **Step 5: Commit:** `git commit -m "System tray host"`
+- [x] **Step 2–4:** Fail, implement, pass. Nested check with `nm-applet` or any tray app: the icon shows, a left click activates it, a right click shows the menu (a Slint popup styled like Caelestia's tray menu).
+- [x] **Step 5: Commit:** `git commit -m "System tray host"`
 
 ### Task 03-5: Status icons (audio, network, Bluetooth, battery)
 

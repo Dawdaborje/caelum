@@ -1,3 +1,5 @@
 # Material Symbols names Caelum uses, one per line. Run tools/subset-icons.sh after editing.
 # The font is Google's Material Symbols Rounded (Apache-2.0).
 calendar_month
+chevron_left
+chevron_right
