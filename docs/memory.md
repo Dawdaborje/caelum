@@ -14,4 +14,4 @@ VmRSS after 60s idle in nested KWin with 2 outputs. Budget ≤ 300000 kB, target
 shm buffers 23 MB (`memfd:smithay-client-toolkit`: background, border and bar per
 output), then fontconfig caches ~14 MB. The 16 MB of AnonHugePages is transparent
 hugepages backing heap, since the nested run has no `MemoryTHP=madvise` (the user unit does).
-Threads: main, tokio, pulse, and two from zbus.
+Threads: 5 (main, the services thread and the Pulse thread, plus two not yet identified).
