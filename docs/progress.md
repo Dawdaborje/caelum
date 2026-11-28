@@ -14,7 +14,7 @@ commit that finishes it, adding the short SHA.
 - [x] 02-3 Theme (f1dcfe7)
 - [x] 02-4 Surfaces and outputs (2813c62)
 - [x] 02-5 Shell window, wallpaper and border frame (769676b)
-- [ ] 02-6 User unit and switch scripts
+- [x] 02-6 User unit and switch scripts (2212479)
 
 ## Phase 1b: Bar (`03-phase1-bar.md`)
 - [ ] 03-1 Bar window and layout
