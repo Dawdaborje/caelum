@@ -18,7 +18,7 @@ commit that finishes it, adding the short SHA.
 
 ## Phase 1b: Bar (`03-phase1-bar.md`)
 - [x] 03-1 Bar window and layout (16bc22b)
-- [ ] 03-2 Workspaces and active window
+- [x] 03-2 Workspaces and active window (4fe75e6)
 - [ ] 03-3 Clock and OS icon
 - [ ] 03-4 Tray
 - [ ] 03-5 Status icons
