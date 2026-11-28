@@ -17,7 +17,7 @@ commit that finishes it, adding the short SHA.
 - [x] 02-6 User unit and switch scripts (2212479)
 
 ## Phase 1b: Bar (`03-phase1-bar.md`)
-- [ ] 03-1 Bar window and layout
+- [x] 03-1 Bar window and layout (16bc22b)
 - [ ] 03-2 Workspaces and active window
 - [ ] 03-3 Clock and OS icon
 - [ ] 03-4 Tray
