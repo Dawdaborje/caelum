@@ -65,6 +65,15 @@ impl TargetPixel for Bgra {
     fn from_rgb(r: u8, g: u8, b: u8) -> Self {
         Bgra { b, g, r, a: 255 }
     }
+    /// The default is opaque black, which would make transparent windows black.
+    fn background() -> Self {
+        Bgra {
+            b: 0,
+            g: 0,
+            r: 0,
+            a: 0,
+        }
+    }
 }
 
 pub(crate) struct Adapter {

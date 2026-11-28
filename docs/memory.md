@@ -7,3 +7,4 @@ VmRSS after 60s idle in nested KWin with 2 outputs. Budget ≤ 300000 kB, target
 |---|---|---|---|---|---|
 | 2026-11-27 | caelestia c90c40f | 780040 | ~460000 | 0 | 13 |
 | 2026-11-27 | spike route 3 (software, 2 bars) | 40504 | 10892 | 0 | 1 |
+| 2026-11-28 | 02-5 wallpaper + border, 2 outputs | 72696 | 38832 | 0 | 1 |

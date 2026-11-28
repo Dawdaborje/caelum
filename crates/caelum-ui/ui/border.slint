@@ -1,0 +1,25 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+import { Theme } from "theme.slint";
+
+// Caelestia's screen frame: `surface` colour, `border-thickness` wide, its inner
+// edge a rectangle rounded by `border-rounding`. Drawn as one rectangle whose
+// border is so wide that its outer rounded edge lies off-screen; the inner
+// radius of a border is the radius minus its width.
+export component Border inherits Window {
+    background: transparent;
+    property <length> spill: 2 * (Theme.border-thickness + Theme.border-rounding);
+    Rectangle {
+        x: Theme.border-thickness - root.spill;
+        y: Theme.border-thickness - root.spill;
+        width: root.width - 2 * (Theme.border-thickness - root.spill);
+        height: root.height - 2 * (Theme.border-thickness - root.spill);
+        border-width: root.spill;
+        border-radius: Theme.border-rounding + root.spill;
+        border-color: Theme.surface;
+    }
+}
+
+// Invisible 1px strip that only reserves a screen edge (its exclusive zone).
+export component Exclusion inherits Window {
+    background: transparent;
+}

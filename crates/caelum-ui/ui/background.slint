@@ -1,0 +1,14 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+import { Theme } from "theme.slint";
+
+// Wallpaper, decoded by the shell at the output's pixel size.
+export component Background inherits Window {
+    in property <image> wallpaper;
+    background: Theme.surface;
+    Image {
+        width: 100%;
+        height: 100%;
+        source: root.wallpaper;
+        image-fit: fill;
+    }
+}
