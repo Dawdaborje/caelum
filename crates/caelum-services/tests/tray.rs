@@ -1,38 +1,16 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! Tray host against a private dbus-daemon: no watcher exists there, so the
 //! service must act as the watcher too.
-use std::{
-    io::{BufRead, BufReader},
-    process::{Child, Command, Stdio},
-    time::Duration,
-};
+mod common;
+
+use std::time::Duration;
 
 use caelum_services::{
     Service,
     tray::{ICON_PX, TrayIcon, TrayService, TrayState},
 };
+use common::{Bus, private_bus};
 use tokio::sync::watch;
-
-struct Bus(Child, String);
-
-impl Drop for Bus {
-    fn drop(&mut self) {
-        let _ = self.0.kill();
-    }
-}
-
-fn private_bus() -> Bus {
-    let mut child = Command::new("dbus-daemon")
-        .args(["--session", "--nofork", "--print-address"])
-        .stdout(Stdio::piped())
-        .spawn()
-        .expect("dbus-daemon");
-    let mut address = String::new();
-    BufReader::new(child.stdout.take().unwrap())
-        .read_line(&mut address)
-        .unwrap();
-    Bus(child, address.trim().to_owned())
-}
 
 struct FakeItem {
     size: i32,

@@ -1,0 +1,50 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+import { Theme } from "../theme.slint";
+import { Icons } from "../icons.slint";
+
+export struct StatusGlyph {
+    // "network", "ethernet", "bluetooth", "audio" or "battery".
+    kind: string,
+    glyph: string,
+    filled: bool,
+    // Caelestia draws a low battery in the error colour.
+    alert: bool,
+}
+
+// Caelestia's bar status icons: Material Symbols in the secondary colour at its
+// bar icon size (icon.small 15pt * 1.2 = 24px), spacing.small apart. Scrolling
+// over the audio icon changes the volume.
+// shortcut: no hover names or popouts, no glyph-change animation, no pulse on
+// connecting Bluetooth devices.
+export component StatusIcons {
+    in property <[StatusGlyph]> icons;
+    in property <bool> horizontal: true;
+    callback volume-scroll(/* up */ bool);
+
+    property <length> size: 24px;
+    property <length> gap: 8px;
+    property <length> length: max(0, root.icons.length * (root.size + root.gap) - root.gap);
+    width: root.horizontal ? root.length : 40px;
+    height: root.horizontal ? 40px : root.length;
+
+    for icon[i] in root.icons: Text {
+        property <length> offset: i * (root.size + root.gap);
+        x: root.horizontal ? self.offset : (root.width - root.size) / 2;
+        y: root.horizontal ? (root.height - root.size) / 2 : self.offset;
+        width: root.size;
+        height: root.size;
+        text: icon.glyph;
+        font-family: icon.filled ? Icons.family-filled : Icons.family;
+        font-size: root.size;
+        color: icon.alert ? Theme.error : Theme.secondary;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+        if icon.kind == "audio": TouchArea {
+            scroll-event(e) => {
+                if e.delta-y == 0 { return reject; }
+                root.volume-scroll(e.delta-y > 0);
+                accept
+            }
+        }
+    }
+}

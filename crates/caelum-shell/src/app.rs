@@ -43,6 +43,7 @@ pub struct App {
     kwin: Option<KwinState>,
     /// Latest tray items; None while the tray service is unavailable.
     tray: Option<TrayState>,
+    status: crate::status::Status,
     os_logo: Image,
 }
 
@@ -56,6 +57,7 @@ pub fn init(cfg: Config) {
         wallpapers: HashMap::new(),
         kwin: None,
         tray: None,
+        status: Default::default(),
         os_logo: bar::os_logo(),
     };
     APP.with(|a| *a.borrow_mut() = Some(app));
@@ -159,6 +161,33 @@ pub fn on_tray(state: Option<TrayState>) {
     });
 }
 
+/// Updates one status service's state and redraws every bar's status icons.
+pub fn on_status(update: impl FnOnce(&mut crate::status::Status)) {
+    with_app(|app| {
+        update(&mut app.status);
+        let glyphs = app.status_glyphs();
+        for o in app.outputs.values() {
+            o.edges
+                .bar
+                .1
+                .set_status_icons(ModelRc::new(VecModel::from(glyphs.clone())));
+        }
+    });
+}
+
+/// Scrolling on the audio icon: one volume step up or down.
+pub fn volume_scroll(up: bool) {
+    let mut target = None;
+    with_app(|app| target = app.status.scrolled_volume(up));
+    if let Some(v) = target {
+        crate::services::run(async move {
+            if let Err(e) = caelum_services::audio::set_volume(v).await {
+                tracing::warn!("set volume: {e}");
+            }
+        });
+    }
+}
+
 pub fn tray_menu_only(service: &str) -> bool {
     let mut only = false;
     with_app(|app| {
@@ -258,11 +287,20 @@ impl App {
         Ok(())
     }
 
+    fn status_glyphs(&self) -> Vec<caelum_ui::StatusGlyph> {
+        if self.cfg.bar.status_icons {
+            self.status.glyphs()
+        } else {
+            Vec::new()
+        }
+    }
+
     fn update_bar(&self, id: u32) {
         if let (Some(o), Some(info)) = (self.outputs.get(&id), self.tracker.info(id)) {
             let b = &o.edges.bar.1;
             b.set_os_logo(self.os_logo.clone());
             b.set_show_tray(self.cfg.bar.tray);
+            b.set_status_icons(ModelRc::new(VecModel::from(self.status_glyphs())));
             let entries = self
                 .tray
                 .as_ref()

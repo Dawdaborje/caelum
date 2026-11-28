@@ -41,6 +41,7 @@ pub fn create_bar(
     let (window, bar) = component(output_id, s, Bar::new)?;
     theme_bridge::apply(&bar, scheme, cfg);
     bar.on_activate_workspace(|id| activate_workspace(&id));
+    bar.on_volume_scroll(crate::app::volume_scroll);
     bar.on_tray_activate(move |s, p| crate::tray::activate(output_id, s.into(), p));
     bar.on_tray_secondary(move |s, p| crate::tray::secondary(output_id, s.into(), p));
     bar.on_tray_menu(move |s, p| crate::tray::open_menu(output_id, s.into(), p));

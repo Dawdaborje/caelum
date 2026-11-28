@@ -97,12 +97,12 @@ low). It forwards `watch` changes to Slint with `slint::invoke_from_event_loop`.
   - `BluetoothState { powered: bool, connected: Vec<String> }`, from BlueZ D-Bus, `Unavailable` with no adapter.
   - `BatteryState { percent: f32, charging: bool, time_to_empty_s: Option<u64> }`, from UPower's DisplayDevice, `Unavailable` when `IsPresent` is false (a desktop PC).
 - Icons and thresholds copied from Caelestia's `StatusIcon.qml` and its services (`Audio.qml`, `Nmcli.qml`, `WifiSignal.qml`, `Connectivity.qml`).
-- [ ] **Step 1: Write failing tests**, using a private dbus-daemon and fake services as in 03-4:
+- [x] **Step 1: Write failing tests**, using a private dbus-daemon and fake services as in 03-4:
   - `absent_service_hides_module`: with no `org.freedesktop.UPower` on the bus, the battery watch value stays `None` and `run` returns `Err(Unavailable)`. The same applies to BlueZ.
   - `battery_present_reports_percent`: a fake UPower DisplayDevice at 42% gives `percent` == 42.0
   - `wifi_icon_buckets_match_caelestia`: `wifi_icon(strength)` for 0, 30, 60, 90 returns the same icon names as Caelestia's buckets
-- [ ] **Step 2–4:** Fail, implement, pass. Real-desktop check (no switch needed): `cargo run -p caelum-services --example status` prints live states as you mute and unmute.
-- [ ] **Step 5:** Widgets in `status-icons.slint`. Scrolling on the audio icon changes the volume, as in Caelestia. **Commit:** `git commit -m "Status icons: audio, network, bluetooth, battery"`
+- [x] **Step 2–4:** Fail, implement, pass. Real-desktop check (no switch needed): `cargo run -p caelum-services --example status` prints live states as you mute and unmute.
+- [x] **Step 5:** Widgets in `status-icons.slint`. Scrolling on the audio icon changes the volume, as in Caelestia. **Commit:** `git commit -m "Status icons: audio, network, bluetooth, battery"`
 
 ### Task 03-6: Bar memory check
 

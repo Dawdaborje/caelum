@@ -3,6 +3,7 @@ mod app;
 mod bar;
 mod clock;
 mod services;
+mod status;
 mod theme_bridge;
 mod tray;
 

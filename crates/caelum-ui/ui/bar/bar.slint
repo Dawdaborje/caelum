@@ -5,13 +5,14 @@ import { ActiveWindow } from "active-window.slint";
 import { Clock, ClockTime, ClockOptions } from "clock.slint";
 import { OsIcon } from "os-icon.slint";
 import { Tray, TrayEntry } from "tray.slint";
+import { StatusIcons, StatusGlyph } from "status-icons.slint";
 
-export { WorkspaceSlot, ClockTime, ClockOptions, TrayEntry }
+export { WorkspaceSlot, ClockTime, ClockOptions, TrayEntry, StatusGlyph }
 
 // The bar's own surface, laid over the frame's bar edge (Border draws its
 // background, so the two join seamlessly). Widgets follow Caelestia's default
 // entries and Bar.qml spacing: start zone (logo, workspaces, app menu) and end
-// zone (tray, clock), each padding.large in from the bar's inner edge and
+// zone (tray, clock, status icons), each padding.large in from the bar's inner edge and
 // spacing.medium apart; the end zone also clears the 12px show-desktop strip.
 export component Bar inherits Window {
     background: transparent;
@@ -35,6 +36,9 @@ export component Bar inherits Window {
     callback tray-activate(string, length);
     callback tray-secondary(string, length);
     callback tray-menu(string, length);
+
+    in property <[StatusGlyph]> status-icons;
+    callback volume-scroll(bool);
 
     in property <bool> show-clock: true;
     in property <ClockTime> clock-time;
@@ -75,16 +79,26 @@ export component Bar inherits Window {
         title: root.window-title;
     }
 
+    // End zone runs backwards from the bar's far edge: status icons, clock, tray
+    // (Caelestia's default entry order).
+    property <length> end: root.horizontal ? root.width - root.tail : root.height - root.tail;
+    status := StatusIcons {
+        x: root.horizontal ? root.end - self.width : (root.width - self.width) / 2;
+        y: root.horizontal ? (root.height - self.height) / 2 : root.end - self.height;
+        visible: root.status-icons.length > 0;
+        horizontal: root.horizontal;
+        icons: root.status-icons;
+        volume-scroll(up) => { root.volume-scroll(up); }
+    }
+    property <length> before-status: (root.horizontal ? status.x : status.y) - (status.visible ? root.gap : 0);
     clock := Clock {
-        x: root.horizontal ? root.width - root.tail - self.width : (root.width - self.width) / 2;
-        y: root.horizontal ? (root.height - self.height) / 2 : root.height - root.tail - self.height;
+        x: root.horizontal ? root.before-status - self.width : (root.width - self.width) / 2;
+        y: root.horizontal ? (root.height - self.height) / 2 : root.before-status - self.height;
         visible: root.show-clock;
         horizontal: root.horizontal;
         time: root.clock-time;
         options: root.clock-options;
     }
-
-    // End zone runs backwards from the bar's far edge: clock, then the tray before it.
     property <length> before-clock: (root.horizontal ? clock.x : clock.y) - (clock.visible ? root.gap : 0);
     Tray {
         x: root.horizontal ? root.before-clock - self.width : (root.width - self.width) / 2;

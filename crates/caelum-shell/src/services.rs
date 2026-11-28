@@ -3,7 +3,10 @@
 //! service, forwarding each state change to the UI thread.
 use std::{future::Future, sync::OnceLock};
 
-use caelum_services::{Service, ServiceError, kwin::KwinService, tray::TrayService};
+use caelum_services::{
+    Service, ServiceError, audio::AudioService, battery::BatteryService,
+    bluetooth::BluetoothService, kwin::KwinService, network::NetworkService, tray::TrayService,
+};
 use tokio::{runtime::Handle, sync::watch};
 
 use crate::app;
@@ -21,6 +24,16 @@ pub fn start() -> std::io::Result<()> {
             rt.block_on(async {
                 spawn(KwinService, app::on_kwin);
                 spawn(TrayService::default(), app::on_tray);
+                spawn(AudioService, |s| app::on_status(|st| st.audio = s));
+                spawn(NetworkService::default(), |s| {
+                    app::on_status(|st| st.network = s)
+                });
+                spawn(BluetoothService::default(), |s| {
+                    app::on_status(|st| st.bluetooth = s)
+                });
+                spawn(BatteryService::default(), |s| {
+                    app::on_status(|st| st.battery = s)
+                });
                 std::future::pending::<()>().await
             })
         })?;
