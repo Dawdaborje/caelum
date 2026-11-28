@@ -103,10 +103,10 @@ and installs as a user unit.
   - Per output: one `Background` layer window (layer `Background`, full anchors, exclusive −1, input Empty) drawing the wallpaper scaled to the output size with `Image::load_from_path` **decoded at output size** (resize with `image` to the output's pixel size before handing to Slint). Plus one `Border` window (layer `Top`, full anchors, input Empty) drawing Caelestia's rounded frame: a filled `Theme.surface` frame `border-thickness` wide with inner corners rounded `border-rounding`.
   - Plus the exclusion surfaces: **one** per output edge that has a reserved zone (in Phase 1 only the bar's edge plus the border thickness on the others), not four always-on windows.
 - [x] **Step 1:** Implement. `main.rs` initialises `tracing_subscriber`, loads the config, computes the scheme, creates windows per `SurfaceAction`, and hooks `watch()` to re-apply the theme (and recompute the scheme if `wallpaper.path` changed) via `slint::invoke_from_event_loop`.
-- [ ] **Step 2: Verify visually:** `tools/nested.sh --outputs 2 target/release/caelum-shell` shows the Sukuna wallpaper and a rounded frame on both outputs. Put a side-by-side screenshot with Caelestia (Spectacle on the real desktop vs the nested window) in `docs/parity/02-5-border.png`. The frame width and corner radius should match by eye at 100% zoom.
+- [x] **Step 2: Verify visually:** `tools/nested.sh --outputs 2 target/release/caelum-shell` shows the Sukuna wallpaper and a rounded frame on both outputs. Put a side-by-side screenshot with Caelestia (Spectacle on the real desktop vs the nested window) in `docs/parity/02-5-border.png`. The frame width and corner radius should match by eye at 100% zoom.
 - [x] **Step 3: Verify reload:** with it running, change `border.thickness` to 20 in the config. The frame updates within 1s with no restart.
 - [x] **Step 4: Measure:** `tools/memcheck.sh target/release/caelum-shell` and append the row. Expected: well under 120MB.
-- [ ] **Step 5: Commit:** `git commit -m "Wallpaper and border frame per output"`
+- [x] **Step 5: Commit:** `git commit -m "Wallpaper and border frame per output"`
 
 ### Task 02-6: User unit and switch scripts
 
