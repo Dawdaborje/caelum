@@ -106,6 +106,6 @@ low). It forwards `watch` changes to Slint with `slint::invoke_from_event_loop`.
 
 ### Task 03-6: Bar memory check
 
-- [ ] **Step 1:** `tools/memcheck.sh target/release/caelum-shell` with a tray app running in the nested session. Append the row to `docs/memory.md`.
-- [ ] **Step 2: Gate:** VmRSS ≤ 200MB at this point, leaving room for 04 and 05 inside the 300MB budget. If it's over, find the biggest mappings (memcheck's stderr) before continuing, and record the cause in `docs/memory.md`.
+- [x] **Step 1:** `tools/memcheck.sh target/release/caelum-shell` with a tray app running in the nested session. Append the row to `docs/memory.md`.
+- [x] **Step 2: Gate:** VmRSS ≤ 200MB at this point, leaving room for 04 and 05 inside the 300MB budget. If it's over, find the biggest mappings (memcheck's stderr) before continuing, and record the cause in `docs/memory.md`.
 - [ ] **Step 3: Commit:** `git commit -m "Record bar memory"`
