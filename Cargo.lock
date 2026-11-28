@@ -560,6 +560,7 @@ dependencies = [
  "caelum-theme",
  "caelum-ui",
  "caelum-wayland",
+ "chrono",
  "image",
  "slint",
  "tokio",

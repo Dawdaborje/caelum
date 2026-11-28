@@ -2,17 +2,22 @@
 import { Theme, Edge } from "../theme.slint";
 import { Workspaces, WorkspaceSlot } from "workspaces.slint";
 import { ActiveWindow } from "active-window.slint";
+import { Clock, ClockTime, ClockOptions } from "clock.slint";
+import { OsIcon } from "os-icon.slint";
 
-export { WorkspaceSlot }
+export { WorkspaceSlot, ClockTime, ClockOptions }
 
 // The bar's own surface, laid over the frame's bar edge (Border draws its
 // background, so the two join seamlessly). Widgets follow Caelestia's default
-// entries: workspaces and the app menu at the start; centre and end fill in
-// later tasks.
+// entries and Bar.qml spacing: start zone (logo, workspaces, app menu) and end
+// zone (clock), each padding.large in from the bar's inner edge and
+// spacing.medium apart; the end zone also clears the 12px show-desktop strip.
 export component Bar inherits Window {
     background: transparent;
     in property <Edge> position: Theme.bar-position;
     in property <length> thickness: Theme.bar-thickness;
+
+    in property <image> os-logo;
 
     in property <bool> show-workspaces: true;
     in property <[WorkspaceSlot]> workspaces;
@@ -24,13 +29,27 @@ export component Bar inherits Window {
     in property <bool> show-window: true;
     in property <string> window-title;
 
+    in property <bool> show-clock: true;
+    in property <ClockTime> clock-time;
+    in property <ClockOptions> clock-options;
+
     property <bool> horizontal: root.position == Edge.top || root.position == Edge.bottom;
     property <length> inset: max(8px, Theme.border-thickness);
-    property <length> gap: 8px;
+    property <length> lead: root.inset + 16px;
+    property <length> tail: root.inset + 16px + 12px;
+    property <length> gap: 12px;
+
+    // Along-bar offset after an item: its far edge plus a gap, or nothing if hidden.
+    os := OsIcon {
+        x: root.horizontal ? root.lead : (root.width - self.width) / 2;
+        y: root.horizontal ? (root.height - self.height) / 2 : root.lead;
+        logo: root.os-logo;
+    }
+    property <length> after-os: root.lead + (os.visible ? (root.horizontal ? os.width : os.height) + root.gap : 0);
 
     ws := Workspaces {
-        x: root.horizontal ? root.inset : (root.width - self.width) / 2;
-        y: root.horizontal ? (root.height - self.height) / 2 : root.inset;
+        x: root.horizontal ? root.after-os : (root.width - self.width) / 2;
+        y: root.horizontal ? (root.height - self.height) / 2 : root.after-os;
         visible: root.show-workspaces;
         horizontal: root.horizontal;
         slots: root.workspaces;
@@ -39,11 +58,22 @@ export component Bar inherits Window {
         occupied-bg: root.occupied-bg;
         activate(id) => { root.activate-workspace(id); }
     }
+    property <length> after-ws: root.after-os + (ws.visible ? (root.horizontal ? ws.width : ws.height) + root.gap : 0);
+
     // shortcut: horizontal bars only; Caelestia shows just the icon on vertical bars.
     ActiveWindow {
-        x: root.inset + (root.show-workspaces ? ws.width + root.gap : 0);
+        x: root.after-ws;
         y: (root.height - self.height) / 2;
         visible: root.horizontal && root.show-window && self.title != "";
         title: root.window-title;
+    }
+
+    Clock {
+        x: root.horizontal ? root.width - root.tail - self.width : (root.width - self.width) / 2;
+        y: root.horizontal ? (root.height - self.height) / 2 : root.height - root.tail - self.height;
+        visible: root.show-clock;
+        horizontal: root.horizontal;
+        time: root.clock-time;
+        options: root.clock-options;
     }
 }

@@ -20,9 +20,8 @@ export component ActiveWindow {
         width: parent.width - 2 * root.pad;
         text: root.title;
         color: Theme.on-surface;
-        font-family: "Rubik";
-        // Caelestia: textSize = thickness * 0.32.
-        font-size: 13px;
+        // Caelestia: textSize = thickness * 0.32, in points.
+        font-size: 13px * 4 / 3;
         overflow: elide;
         vertical-alignment: center;
     }

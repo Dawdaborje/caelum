@@ -25,10 +25,21 @@ smoothing = 20
 # Screen edge the bar sits on: "top", "bottom", "left" or "right".
 position = "bottom"
 # Widgets to show.
-clock = true
 tray = true
 status_icons = true
 appmenu = true
+
+[bar.clock]
+enabled = true
+# Draw the clock on a pill.
+background = false
+# Show the weekday and day of month before the time.
+show_date = false
+# Show a calendar icon before the time.
+show_icon = true
+show_seconds = false
+# 12-hour time with am/pm.
+twelve_hour = false
 
 [bar.workspaces]
 enabled = true

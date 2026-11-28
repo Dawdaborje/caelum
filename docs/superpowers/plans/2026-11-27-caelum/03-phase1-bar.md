@@ -68,9 +68,9 @@ low). It forwards `watch` changes to Slint with `slint::invoke_from_event_loop`.
 **Interfaces:**
 - Produces: `clock.rs` runs a `slint::Timer` that re-arms itself to fire at the **next minute boundary** (or second boundary if the format has seconds), not every 1s. Format: copy Caelestia's default from `Clock.qml` / `generalconfig.hpp`, using `chrono` formatting.
 - Icons: Caelestia uses the Material Symbols Rounded variable font (63MB mapped). Ship a **subset** containing only the glyphs Caelum uses: `tools/subset-icons.sh` runs `pyftsubset` with the codepoint list in `crates/caelum-ui/fonts/icons.txt`, and Slint embeds the subset with `import "fonts/material-symbols-subset.ttf"`. Each task that adds an icon adds its name to `icons.txt`.
-- [ ] **Step 1:** Write a test `next_tick_is_minute_boundary`: for 12:00:37.250, `ms_until_next_tick(.., with_seconds=false)` == 22_750.
-- [ ] **Step 2–4:** Fail, implement `pub fn ms_until_next_tick(now: chrono::NaiveTime, with_seconds: bool) -> u64`, pass.
-- [ ] **Step 5:** OS icon from `/etc/os-release` `LOGO` / `ID`, matching Caelestia's `OsIcon.qml`. Parity screenshot. **Commit:** `git commit -m "Clock, OS icon, subset icon font"`
+- [x] **Step 1:** Write a test `next_tick_is_minute_boundary`: for 12:00:37.250, `ms_until_next_tick(.., with_seconds=false)` == 22_750.
+- [x] **Step 2–4:** Fail, implement `pub fn ms_until_next_tick(now: chrono::NaiveTime, with_seconds: bool) -> u64`, pass.
+- [x] **Step 5:** OS icon from `/etc/os-release` `LOGO` / `ID`, matching Caelestia's `OsIcon.qml`. Parity screenshot. **Commit:** `git commit -m "Clock, OS icon, subset icon font"`
 
 ### Task 03-4: Tray (StatusNotifierItem host)
 

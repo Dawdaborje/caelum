@@ -72,7 +72,7 @@ pub enum Edge {
 #[serde(default)]
 pub struct BarConfig {
     pub position: Edge,
-    pub clock: bool,
+    pub clock: BarClock,
     pub tray: bool,
     pub status_icons: bool,
     pub appmenu: bool,
@@ -83,11 +83,37 @@ impl Default for BarConfig {
     fn default() -> Self {
         Self {
             position: Edge::default(),
-            clock: true,
+            clock: BarClock::default(),
             tray: true,
             status_icons: true,
             appmenu: true,
             workspaces: BarWorkspaces::default(),
+        }
+    }
+}
+
+/// Caelestia's `bar.clock`, plus `enabled` (its per-widget toggle).
+#[derive(Deserialize, Clone, Debug, PartialEq)]
+#[serde(default)]
+pub struct BarClock {
+    pub enabled: bool,
+    pub background: bool,
+    pub show_date: bool,
+    pub show_icon: bool,
+    pub show_seconds: bool,
+    /// Caelestia's `services.clockFormat = "TwelveHour"`.
+    pub twelve_hour: bool,
+}
+
+impl Default for BarClock {
+    fn default() -> Self {
+        Self {
+            enabled: true,
+            background: false,
+            show_date: false,
+            show_icon: true,
+            show_seconds: false,
+            twelve_hour: false,
         }
     }
 }

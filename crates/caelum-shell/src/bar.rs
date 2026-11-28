@@ -6,14 +6,14 @@
 //! frame is bar-thick on that edge), so the two join seamlessly.
 use crate::{
     app::{component, spec},
-    theme_bridge,
+    clock, theme_bridge,
 };
 use caelum_config::{BarWorkspaces, Config, Edge};
 use caelum_services::kwin::{KwinState, Workspace, activate_workspace};
 use caelum_theme::Scheme;
-use caelum_ui::{Bar, WorkspaceSlot};
+use caelum_ui::{Bar, ClockOptions, WorkspaceSlot};
 use caelum_wayland::{Anchors, InputRegion, Layer, LayerWindow};
-use slint::{ModelRc, VecModel};
+use slint::{Image, ModelRc, Rgba8Pixel, SharedPixelBuffer, VecModel};
 
 /// Anchors for a strip along `edge`, stretched over its full length.
 pub fn edge_anchors(edge: Edge) -> Anchors {
@@ -44,8 +44,17 @@ pub fn create_bar(
     Ok((window, bar))
 }
 
-/// Pushes config switches and KWin state into one output's bar.
+/// Pushes config switches, the clock and KWin state into one output's bar.
 pub fn update(bar: &Bar, cfg: &Config, kwin: Option<&KwinState>, output: &str) {
+    let c = &cfg.bar.clock;
+    bar.set_show_clock(c.enabled);
+    bar.set_clock_options(ClockOptions {
+        background: c.background,
+        show_date: c.show_date,
+        show_icon: c.show_icon,
+        show_seconds: c.show_seconds,
+    });
+    bar.set_clock_time(clock::now(c.twelve_hour));
     let ws = &cfg.bar.workspaces;
     bar.set_show_workspaces(ws.enabled && kwin.is_some());
     bar.set_active_indicator(ws.active_indicator);
@@ -58,6 +67,44 @@ pub fn update(bar: &Bar, cfg: &Config, kwin: Option<&KwinState>, output: &str) {
     bar.set_active_workspace(active);
     let title = kwin.active_window.as_ref().map(|w| w.title.as_str());
     bar.set_window_title(title.unwrap_or_default().into());
+}
+
+/// The distro logo, as Caelestia's SysInfo: `LOGO` from /etc/os-release, looked
+/// up as an icon. Empty (the icon hides) when there is none.
+/// shortcut: PNGs in hicolor and pixmaps only, no icon-theme lookup or SVG (this
+/// Slint build has no SVG support), and no Caelestia-logo fallback.
+pub fn os_logo() -> Image {
+    let Ok(release) = std::fs::read_to_string("/etc/os-release") else {
+        return Image::default();
+    };
+    let Some(name) = logo_name(&release) else {
+        return Image::default();
+    };
+    let sizes = ["512x512", "256x256", "128x128", "96x96", "64x64", "48x48"];
+    let candidates = sizes
+        .iter()
+        .map(|s| format!("/usr/share/icons/hicolor/{s}/apps/{name}.png"))
+        .chain([format!("/usr/share/pixmaps/{name}.png")]);
+    for path in candidates {
+        match image::open(&path) {
+            Ok(img) => {
+                let rgba = img.into_rgba8();
+                let (w, h) = rgba.dimensions();
+                let buf = SharedPixelBuffer::<Rgba8Pixel>::clone_from_slice(rgba.as_raw(), w, h);
+                return Image::from_rgba8(buf);
+            }
+            Err(image::ImageError::IoError(_)) => {}
+            Err(e) => tracing::warn!("os logo {path}: {e}"),
+        }
+    }
+    Image::default()
+}
+
+/// The `LOGO=` value of an os-release file, unquoted.
+fn logo_name(release: &str) -> Option<&str> {
+    let value = release.lines().find_map(|l| l.strip_prefix("LOGO="))?;
+    let value = value.trim().trim_matches(|c| c == '"' || c == '\'');
+    (!value.is_empty()).then_some(value)
 }
 
 /// The workspace slots one output's bar shows, as Caelestia's `Workspaces.wsIds`:
@@ -119,6 +166,19 @@ mod tests {
 
     fn ids(slots: &[WorkspaceSlot]) -> Vec<String> {
         slots.iter().map(|s| s.id.to_string()).collect()
+    }
+
+    #[test]
+    fn logo_name_unquotes() {
+        assert_eq!(
+            logo_name("ID=arch\nLOGO=archlinux-logo\n"),
+            Some("archlinux-logo")
+        );
+        assert_eq!(
+            logo_name("LOGO=\"fedora-logo-icon\""),
+            Some("fedora-logo-icon")
+        );
+        assert_eq!(logo_name("ID=x\nLOGO=\n"), None);
     }
 
     #[test]

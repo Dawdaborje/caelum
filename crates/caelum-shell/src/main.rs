@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 mod app;
 mod bar;
+mod clock;
 mod services;
 mod theme_bridge;
 
@@ -14,6 +15,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     app::init(cfg);
     caelum_wayland::init(app::on_output)?;
     services::start()?;
+    clock::tick();
     // Kept alive for the whole run; reloads hop onto the UI thread.
     let _watch = caelum_config::watch(path, |cfg| {
         if let Err(e) = slint::invoke_from_event_loop(move || app::on_config(cfg)) {

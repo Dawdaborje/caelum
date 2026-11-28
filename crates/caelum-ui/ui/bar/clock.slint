@@ -1,0 +1,110 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+import { Theme } from "../theme.slint";
+import { Icons } from "../icons.slint";
+
+// Formatted by caelum-shell clock.rs on each tick.
+export struct ClockTime {
+    weekday: string,
+    day: string,
+    hour: string,
+    minute: string,
+    second: string,
+    // "am"/"pm", or empty for 24-hour.
+    am-pm: string,
+}
+
+export struct ClockOptions {
+    background: bool,
+    show-date: bool,
+    show-icon: bool,
+    show-seconds: bool,
+}
+
+// Caelestia's bar Clock: tertiary text, optional calendar icon and date, on an
+// optional full-round pill. Sizes from its 40px bar inner width: icon 0.42,
+// text 0.32 (time scaled 1.1). Caelestia's sizes are points: 1pt = 4/3px.
+export component Clock {
+    in property <ClockTime> time;
+    in property <ClockOptions> options;
+    in property <bool> horizontal: true;
+
+    property <length> icon-size: 17px * 4 / 3;
+    property <length> text-size: 13px * 4 / 3;
+    property <length> time-size: 14.3px * 4 / 3;
+    // Caelestia: padding.medium with a background, padding.extraSmall without.
+    property <length> pad: root.options.background ? 12px : 4px;
+    property <color> colour: Theme.tertiary;
+
+    width: root.horizontal ? row.preferred-width + 2 * root.pad : 40px;
+    height: root.horizontal ? 40px : column.preferred-height + 2 * root.pad;
+
+    Rectangle {
+        background: root.options.background ? Theme.surface-container : transparent;
+        border-radius: min(self.width, self.height) / 2;
+    }
+
+    row := HorizontalLayout {
+        visible: root.horizontal;
+        x: root.pad;
+        spacing: 4px;
+        alignment: center;
+        if root.options.show-icon: Text {
+            text: Icons.calendar-month;
+            font-family: Icons.family;
+            font-size: root.icon-size;
+            color: root.colour;
+            vertical-alignment: center;
+        }
+        if root.options.show-date: Text {
+            text: root.time.weekday + " " + root.time.day;
+            font-size: root.text-size;
+            color: root.colour;
+            vertical-alignment: center;
+        }
+        if root.options.show-date: Rectangle {
+            width: 1px;
+            height: root.text-size * 1.3;
+            y: (parent.height - self.height) / 2;
+            background: root.colour.with-alpha(0.2);
+        }
+        for part in [root.time.hour, ":", root.time.minute, root.options.show-seconds ? ":" + root.time.second : ""]: Text {
+            visible: part != "";
+            text: part;
+            font-size: root.time-size;
+            color: root.colour;
+            vertical-alignment: center;
+        }
+        if root.time.am-pm != "": Text {
+            text: root.time.am-pm;
+            font-size: root.text-size * 0.9;
+            color: root.colour;
+            vertical-alignment: center;
+        }
+    }
+
+    column := VerticalLayout {
+        visible: !root.horizontal;
+        y: root.pad;
+        spacing: 0px;
+        if root.options.show-icon: Text {
+            text: Icons.calendar-month;
+            font-family: Icons.family;
+            font-size: root.icon-size;
+            color: root.colour;
+            horizontal-alignment: center;
+        }
+        if root.options.show-date: Text {
+            text: root.time.weekday + "\n" + root.time.day;
+            font-size: root.text-size;
+            color: root.colour;
+            horizontal-alignment: center;
+        }
+        for part in [root.time.hour, root.time.minute, root.options.show-seconds ? root.time.second : "", root.time.am-pm]: Text {
+            visible: part != "";
+            text: part;
+            font-size: root.time-size;
+            color: root.colour;
+            horizontal-alignment: center;
+        }
+    }
+}

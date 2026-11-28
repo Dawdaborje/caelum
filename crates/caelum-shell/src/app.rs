@@ -40,6 +40,7 @@ pub struct App {
     wallpapers: HashMap<(u32, u32), Image>,
     /// Latest workspaces and active window; None until (or unless) KWin reports.
     kwin: Option<KwinState>,
+    os_logo: Image,
 }
 
 pub fn init(cfg: Config) {
@@ -51,6 +52,7 @@ pub fn init(cfg: Config) {
         outputs: HashMap::new(),
         wallpapers: HashMap::new(),
         kwin: None,
+        os_logo: bar::os_logo(),
     };
     APP.with(|a| *a.borrow_mut() = Some(app));
 }
@@ -116,6 +118,24 @@ pub fn on_config(cfg: Config) {
         }
         tracing::info!("config reloaded");
     });
+    // The seconds switch changes how often the clock ticks.
+    crate::clock::tick();
+}
+
+pub fn on_clock() {
+    with_app(|app| {
+        let time = crate::clock::now(app.cfg.bar.clock.twelve_hour);
+        for o in app.outputs.values() {
+            o.edges.bar.1.set_clock_time(time.clone());
+        }
+    });
+}
+
+/// Whether the clock shows seconds, so it must tick every second.
+pub fn clock_seconds() -> bool {
+    let mut seconds = false;
+    with_app(|app| seconds = app.cfg.bar.clock.enabled && app.cfg.bar.clock.show_seconds);
+    seconds
 }
 
 pub fn on_kwin(state: Option<KwinState>) {
@@ -178,7 +198,9 @@ impl App {
 
     fn update_bar(&self, id: u32) {
         if let (Some(o), Some(info)) = (self.outputs.get(&id), self.tracker.info(id)) {
-            bar::update(&o.edges.bar.1, &self.cfg, self.kwin.as_ref(), &info.name);
+            let b = &o.edges.bar.1;
+            b.set_os_logo(self.os_logo.clone());
+            bar::update(b, &self.cfg, self.kwin.as_ref(), &info.name);
         }
     }
 
