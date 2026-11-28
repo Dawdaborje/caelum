@@ -1,4 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+export enum Edge { top, bottom, left, right }
+
 // Colours: every role of caelum_theme::Scheme (set by caelum-shell theme_bridge).
 export global Theme {
     in property <color> background;
@@ -52,4 +54,6 @@ export global Theme {
     in property <color> on-tertiary-fixed-variant;
     in property <length> border-thickness: 10px;
     in property <length> border-rounding: 25px;
+    in property <Edge> bar-position: Edge.bottom;
+    in property <length> bar-thickness: 60px;
 }

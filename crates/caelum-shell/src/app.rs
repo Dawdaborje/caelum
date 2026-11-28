@@ -4,14 +4,14 @@ use std::{cell::RefCell, collections::HashMap, path::Path};
 
 use caelum_config::Config;
 use caelum_theme::{Scheme, scheme_or_fallback};
-use caelum_ui::{Background, Border, Exclusion};
+use caelum_ui::{Background, Bar, Border, Exclusion};
 use caelum_wayland::{
     Anchors, InputRegion, KeyboardMode, Layer, LayerSpec, LayerWindow, OutputEvent, OutputInfo,
     OutputTracker, SurfaceAction, WaylandError, create_layer_window,
 };
 use slint::{ComponentHandle, Image, Rgb8Pixel, SharedPixelBuffer};
 
-use crate::theme_bridge;
+use crate::{bar, theme_bridge};
 
 thread_local! {
     static APP: RefCell<Option<App>> = const { RefCell::new(None) };
@@ -20,7 +20,14 @@ thread_local! {
 struct OutputSurfaces {
     background: (LayerWindow, Background),
     border: (LayerWindow, Border),
-    exclusions: Vec<(LayerWindow, Exclusion)>,
+    edges: EdgeSurfaces,
+}
+
+/// Surfaces that depend on the bar position and thickness, rebuilt when they change.
+struct EdgeSurfaces {
+    bar: (LayerWindow, Bar),
+    /// Held only to keep the strips' exclusive zones alive.
+    _exclusions: Vec<(LayerWindow, Exclusion)>,
 }
 
 pub struct App {
@@ -80,6 +87,8 @@ pub fn on_config(cfg: Config) {
             app.scheme = scheme_or_fallback(&cfg.wallpaper.path, cfg.wallpaper.dark);
         }
         let new_wallpaper = cfg.wallpaper.path != app.cfg.wallpaper.path;
+        let new_edges = (cfg.bar.position, cfg.border.thickness)
+            != (app.cfg.bar.position, app.cfg.border.thickness);
         app.cfg = cfg;
         if new_wallpaper {
             app.wallpapers.clear();
@@ -89,18 +98,22 @@ pub fn on_config(cfg: Config) {
             if new_wallpaper {
                 app.set_wallpaper(id);
             }
+            if new_edges {
+                match app.edges(id) {
+                    Ok(edges) => app.outputs.get_mut(&id).unwrap().edges = edges,
+                    Err(e) => tracing::error!("bar on output {id}: {e}"),
+                }
+            }
             let o = &app.outputs[&id];
             theme_bridge::apply(&o.background.1, &app.scheme, &app.cfg);
             theme_bridge::apply(&o.border.1, &app.scheme, &app.cfg);
-            for (window, _) in &o.exclusions {
-                window.set_exclusive_zone(app.cfg.border.thickness as i32);
-            }
+            theme_bridge::apply(&o.edges.bar.1, &app.scheme, &app.cfg);
         }
         tracing::info!("config reloaded");
     });
 }
 
-fn spec(
+pub(crate) fn spec(
     namespace: &'static str,
     layer: Layer,
     anchors: Anchors,
@@ -132,25 +145,7 @@ impl App {
             Border::new,
         )?;
 
-        // shortcut: all four edges reserve the border thickness; 03-1 adds the bar's edge.
-        let zone = self.cfg.border.thickness as i32;
-        let edges = [
-            (Anchors::TOP | Anchors::LEFT | Anchors::RIGHT, (0, 1)),
-            (Anchors::BOTTOM | Anchors::LEFT | Anchors::RIGHT, (0, 1)),
-            (Anchors::LEFT | Anchors::TOP | Anchors::BOTTOM, (1, 0)),
-            (Anchors::RIGHT | Anchors::TOP | Anchors::BOTTOM, (1, 0)),
-        ];
-        let exclusions = edges
-            .into_iter()
-            .map(|(anchors, size)| {
-                component(
-                    id,
-                    spec("caelum-exclusion", Layer::Bottom, anchors, size, zone),
-                    Exclusion::new,
-                )
-            })
-            .collect::<Result<_, _>>()?;
-
+        let edges = self.edges(id)?;
         theme_bridge::apply(&background.1, &self.scheme, &self.cfg);
         theme_bridge::apply(&border.1, &self.scheme, &self.cfg);
         self.outputs.insert(
@@ -158,11 +153,44 @@ impl App {
             OutputSurfaces {
                 background,
                 border,
-                exclusions,
+                edges,
             },
         );
         self.set_wallpaper(id);
         Ok(())
+    }
+
+    /// The bar reserves its own edge; the other edges reserve the border thickness.
+    fn edges(&self, id: u32) -> Result<EdgeSurfaces, Box<dyn std::error::Error>> {
+        use caelum_config::Edge;
+        let bar = bar::create_bar(id, &self.scheme, &self.cfg)?;
+        let zone = self.cfg.border.thickness as i32;
+        let exclusions = [Edge::Top, Edge::Bottom, Edge::Left, Edge::Right]
+            .into_iter()
+            .filter(|&e| e != self.cfg.bar.position)
+            .map(|e| {
+                let size = if matches!(e, Edge::Top | Edge::Bottom) {
+                    (0, 1)
+                } else {
+                    (1, 0)
+                };
+                component(
+                    id,
+                    spec(
+                        "caelum-exclusion",
+                        Layer::Bottom,
+                        bar::edge_anchors(e),
+                        size,
+                        zone,
+                    ),
+                    Exclusion::new,
+                )
+            })
+            .collect::<Result<_, _>>()?;
+        Ok(EdgeSurfaces {
+            bar,
+            _exclusions: exclusions,
+        })
     }
 
     fn set_wallpaper(&mut self, id: u32) {
@@ -187,7 +215,7 @@ impl App {
     }
 }
 
-fn component<C: ComponentHandle>(
+pub(crate) fn component<C: ComponentHandle>(
     output: u32,
     spec: LayerSpec,
     new: impl FnOnce() -> Result<C, slint::PlatformError>,

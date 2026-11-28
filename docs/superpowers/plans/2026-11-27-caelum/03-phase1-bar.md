@@ -40,9 +40,9 @@ low). It forwards `watch` changes to Slint with `slint::invoke_from_event_loop`.
 
 **Interfaces:**
 - Produces: `export component Bar` with `in property <Edge> position`, `in property <length> thickness`, and slots (child elements) for start/centre/end widget groups, matching Caelestia's `BarPlacements.qml`. `bar.rs`: `fn create_bar(output_id: u32, cfg: &Config) -> LayerWindow`. The bar is drawn **inside the Border window from 02-5** if the ADR route supports several Slint components in one window, otherwise as its own Top layer window anchored to `cfg.bar.position`. Record the choice in a comment at the top of `bar.rs`.
-- [ ] **Step 1:** Implement the empty bar (no widgets) on its edge, with its exclusive zone set to the bar thickness, joined seamlessly to the border frame the way Caelestia's is.
-- [ ] **Step 2: Verify:** nested KWin with 2 outputs. A maximised `konsole` sits beside the bar on both outputs, and `bar.position = "left"` in the config moves it live. Parity screenshot `docs/parity/03-1-bar.png`.
-- [ ] **Step 3: Commit:** `git commit -m "Bar window joined to the border"`
+- [x] **Step 1:** Implement the empty bar (no widgets) on its edge, with its exclusive zone set to the bar thickness, joined seamlessly to the border frame the way Caelestia's is.
+- [x] **Step 2: Verify:** nested KWin with 2 outputs. A maximised `konsole` sits beside the bar on both outputs, and `bar.position = "left"` in the config moves it live. Parity screenshot `docs/parity/03-1-bar.png`.
+- [x] **Step 3: Commit:** `git commit -m "Bar window joined to the border"`
 
 ### Task 03-2: Workspaces and active window (KDE protocols)
 

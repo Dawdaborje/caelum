@@ -2,11 +2,16 @@
 //! Copies the colour scheme and border sizes into a component's `Theme` global.
 use caelum_config::Config;
 use caelum_theme::{Rgba, Scheme};
-use caelum_ui::Theme;
+use caelum_ui::{Edge, Theme};
 use slint::{Color, ComponentHandle, Global};
 
 fn color(Rgba(r, g, b, a): Rgba) -> Color {
     Color::from_argb_u8(a, r, g, b)
+}
+
+/// Caelestia's `BarWrapper.contentWidth`: inner width 40 plus padding on both sides.
+pub fn bar_thickness(cfg: &Config) -> u32 {
+    40 + 2 * cfg.border.thickness.max(8)
 }
 
 /// Every Slint window has its own globals, so this runs once per component.
@@ -18,6 +23,13 @@ where
     let t = ui.global::<Theme>();
     t.set_border_thickness(cfg.border.thickness as f32);
     t.set_border_rounding(cfg.border.rounding as f32);
+    t.set_bar_thickness(bar_thickness(cfg) as f32);
+    t.set_bar_position(match cfg.bar.position {
+        caelum_config::Edge::Top => Edge::Top,
+        caelum_config::Edge::Bottom => Edge::Bottom,
+        caelum_config::Edge::Left => Edge::Left,
+        caelum_config::Edge::Right => Edge::Right,
+    });
     t.set_background(color(scheme.background));
     t.set_on_background(color(scheme.on_background));
     t.set_surface(color(scheme.surface));

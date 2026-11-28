@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 mod app;
+mod bar;
 mod theme_bridge;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {

@@ -1,0 +1,27 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+import { Theme, Edge } from "../theme.slint";
+
+// The bar's own surface, laid over the frame's bar edge (Border draws its
+// background, so the two join seamlessly). Widget groups follow Caelestia's
+// BarPlacements: start, centre, end along the bar.
+// shortcut: groups are empty until 03-2 adds widgets; @children can fill only one slot.
+export component Bar inherits Window {
+    background: transparent;
+    in property <Edge> position: Theme.bar-position;
+    in property <length> thickness: Theme.bar-thickness;
+    property <bool> horizontal: root.position == Edge.top || root.position == Edge.bottom;
+    property <length> inset: max(8px, Theme.border-thickness);
+
+    if root.horizontal: HorizontalLayout {
+        padding: root.inset;
+        HorizontalLayout { alignment: start; }
+        HorizontalLayout { alignment: center; }
+        HorizontalLayout { alignment: end; }
+    }
+    if !root.horizontal: VerticalLayout {
+        padding: root.inset;
+        VerticalLayout { alignment: start; }
+        VerticalLayout { alignment: center; }
+        VerticalLayout { alignment: end; }
+    }
+}

@@ -68,10 +68,53 @@ pub enum Edge {
     Right,
 }
 
-#[derive(Deserialize, Clone, Debug, PartialEq, Default)]
+#[derive(Deserialize, Clone, Debug, PartialEq)]
 #[serde(default)]
 pub struct BarConfig {
     pub position: Edge,
+    pub clock: bool,
+    pub tray: bool,
+    pub status_icons: bool,
+    pub appmenu: bool,
+    pub workspaces: BarWorkspaces,
+}
+
+impl Default for BarConfig {
+    fn default() -> Self {
+        Self {
+            position: Edge::default(),
+            clock: true,
+            tray: true,
+            status_icons: true,
+            appmenu: true,
+            workspaces: BarWorkspaces::default(),
+        }
+    }
+}
+
+/// Caelestia's `bar.workspaces`, plus `enabled` (its per-widget toggle).
+#[derive(Deserialize, Clone, Debug, PartialEq)]
+#[serde(default)]
+pub struct BarWorkspaces {
+    pub enabled: bool,
+    pub shown: u32,
+    pub active_indicator: bool,
+    pub occupied_bg: bool,
+    pub show_unoccupied: bool,
+    pub show_windows: bool,
+}
+
+impl Default for BarWorkspaces {
+    fn default() -> Self {
+        Self {
+            enabled: true,
+            shown: 5,
+            active_indicator: true,
+            occupied_bg: false,
+            show_unoccupied: true,
+            show_windows: true,
+        }
+    }
 }
 
 #[derive(Deserialize, Clone, Debug, PartialEq, Default)]

@@ -1,18 +1,23 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-import { Theme } from "theme.slint";
+import { Theme, Edge } from "theme.slint";
 
-// Caelestia's screen frame: `surface` colour, `border-thickness` wide, its inner
-// edge a rectangle rounded by `border-rounding`. Drawn as one rectangle whose
-// border is so wide that its outer rounded edge lies off-screen; the inner
-// radius of a border is the radius minus its width.
+// Caelestia's screen frame: `surface` colour, `border-thickness` wide (bar-thickness
+// on the bar's edge, so the bar's background is the frame itself), its inner edge
+// a rectangle rounded by `border-rounding`. Drawn as one rectangle whose border is
+// so wide that its outer rounded edge lies off-screen; the inner radius of a border
+// is the radius minus its width.
 export component Border inherits Window {
     background: transparent;
-    property <length> spill: 2 * (Theme.border-thickness + Theme.border-rounding);
+    property <length> spill: 2 * (Theme.bar-thickness + Theme.border-rounding);
+    property <length> top: Theme.bar-position == Edge.top ? Theme.bar-thickness : Theme.border-thickness;
+    property <length> bottom: Theme.bar-position == Edge.bottom ? Theme.bar-thickness : Theme.border-thickness;
+    property <length> left: Theme.bar-position == Edge.left ? Theme.bar-thickness : Theme.border-thickness;
+    property <length> right: Theme.bar-position == Edge.right ? Theme.bar-thickness : Theme.border-thickness;
     Rectangle {
-        x: Theme.border-thickness - root.spill;
-        y: Theme.border-thickness - root.spill;
-        width: root.width - 2 * (Theme.border-thickness - root.spill);
-        height: root.height - 2 * (Theme.border-thickness - root.spill);
+        x: root.left - root.spill;
+        y: root.top - root.spill;
+        width: root.width - root.left - root.right + 2 * root.spill;
+        height: root.height - root.top - root.bottom + 2 * root.spill;
         border-width: root.spill;
         border-radius: Theme.border-rounding + root.spill;
         border-color: Theme.surface;

@@ -24,3 +24,21 @@ smoothing = 20
 [bar]
 # Screen edge the bar sits on: "top", "bottom", "left" or "right".
 position = "bottom"
+# Widgets to show.
+clock = true
+tray = true
+status_icons = true
+appmenu = true
+
+[bar.workspaces]
+enabled = true
+# Number of workspace slots.
+shown = 5
+# Highlight the active workspace with a moving pill.
+active_indicator = true
+# Fill occupied workspaces with a background.
+occupied_bg = false
+# Show slots for empty workspaces.
+show_unoccupied = true
+# Show app icons of each workspace's windows.
+show_windows = true
