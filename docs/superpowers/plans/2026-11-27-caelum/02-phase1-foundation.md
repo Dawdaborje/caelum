@@ -133,6 +133,6 @@ and installs as a user unit.
   MemoryTHP=madvise
   ```
   `tools/switch.sh caelum|caelestia`. `caelum` runs `cargo build --release`, installs the binary and unit to `~/.local/bin` and `~/.config/systemd/user`, `daemon-reload`, `start caelum-shell`. `caelestia` runs `systemctl --user start caelestia-shell`, which stops Caelum through `Conflicts=` in reverse. The script does **not** `enable` Caelum: the owner enables it manually once Phase 1 is complete.
-- [ ] **Step 1:** Write both files and the README.
-- [ ] **Step 2: Verify:** `systemd-analyze --user verify dist/caelum-shell.service` prints nothing. Then `tools/switch.sh caelum`: Caelestia stops and Caelum draws on the real desktop. Then `tools/switch.sh caelestia`: Caelestia returns and `systemctl --user is-active caelum-shell` prints `inactive`.
-- [ ] **Step 3: Commit:** `git commit -m "User unit and switch script"`
+- [x] **Step 1:** Write both files and the README.
+- [x] **Step 2: Verify:** `systemd-analyze --user verify dist/caelum-shell.service` prints nothing. Then `tools/switch.sh caelum`: Caelestia stops and Caelum draws on the real desktop. Then `tools/switch.sh caelestia`: Caelestia returns and `systemctl --user is-active caelum-shell` prints `inactive`.
+- [x] **Step 3: Commit:** `git commit -m "User unit and switch script"`

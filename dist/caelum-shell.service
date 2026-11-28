@@ -1,0 +1,15 @@
+[Unit]
+Description=Caelum Shell
+PartOf=graphical-session.target
+After=graphical-session.target
+Before=xdg-desktop-autostart.target
+Conflicts=caelestia-shell.service
+
+[Service]
+Type=exec
+ExecStart=%h/.local/bin/caelum-shell
+Restart=on-failure
+RestartSec=5s
+TimeoutStopSec=5s
+Slice=session.slice
+MemoryTHP=madvise
