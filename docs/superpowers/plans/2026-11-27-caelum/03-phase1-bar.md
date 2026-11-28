@@ -52,13 +52,13 @@ low). It forwards `watch` changes to Slint with `slint::invoke_from_event_loop`.
 **Interfaces:**
 - Consumes: `org_kde_plasma_virtual_desktop_management` and `org_kde_plasma_window_management` (from `caelum-wayland/protocols`). Reference behaviour: `~/caelestia/shell/services/Kwin.qml`, plus its `KWinWorkspaceState` and `KWinActiveWindowBridge` C++.
 - Produces: `pub struct KwinState { pub workspaces: Vec<Workspace>, pub active_by_output: HashMap<String, String>, pub active_window: Option<WindowInfo> }`, with `Workspace { id: String, name: String, position: u32, occupied: bool }` and `WindowInfo { id: String, title: String, app_id: String, output: Option<String> }`. Plus `pub struct KwinTracker` (pure, fed by protocol events), `fn apply(&mut self, ev: KwinEvent) -> KwinState`, and `pub struct KwinService: Service<State = KwinState>`. Activating a workspace: `pub async fn activate_workspace(id: &str)`, through the protocol's `request_activate`.
-- [ ] **Step 1: Write failing tests** for `KwinTracker`:
+- [x] **Step 1: Write failing tests** for `KwinTracker`:
   - `desktops_sorted_by_position`: adding desktops at positions 2, 0, 1 yields `workspaces` ordered 0, 1, 2
   - `occupied_follows_windows`: a window on desktop B makes B `occupied`, and closing it clears it
   - `active_window_tracks_focus`: two windows, focus the second, so `active_window.title` is the second's
-- [ ] **Step 2:** Tests fail. **Step 3:** Implement the tracker, then the Wayland event pump into it.
-- [ ] **Step 4:** Tests pass. Nested check: creating desktops in the nested KWin (`qdbus org.kde.KWin /VirtualDesktopManager createDesktop 1 two`, pointed at the nested session's D-Bus) shows them. Clicking one switches desktop. The widget follows `shown`, `active_indicator`, `occupied_bg` and `show_unoccupied`.
-- [ ] **Step 5: Commit:** `git commit -m "Workspaces and active window from KWin protocols"`
+- [x] **Step 2:** Tests fail. **Step 3:** Implement the tracker, then the Wayland event pump into it.
+- [x] **Step 4:** Tests pass. Nested check: creating desktops in the nested KWin (`qdbus org.kde.KWin /VirtualDesktopManager createDesktop 1 two`, pointed at the nested session's D-Bus) shows them. Clicking one switches desktop. The widget follows `shown`, `active_indicator`, `occupied_bg` and `show_unoccupied`.
+- [x] **Step 5: Commit:** `git commit -m "Workspaces and active window from KWin protocols"`
 
 ### Task 03-3: Clock and OS icon
 

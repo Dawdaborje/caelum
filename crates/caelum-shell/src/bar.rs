@@ -8,10 +8,12 @@ use crate::{
     app::{component, spec},
     theme_bridge,
 };
-use caelum_config::{Config, Edge};
+use caelum_config::{BarWorkspaces, Config, Edge};
+use caelum_services::kwin::{KwinState, Workspace, activate_workspace};
 use caelum_theme::Scheme;
-use caelum_ui::Bar;
+use caelum_ui::{Bar, WorkspaceSlot};
 use caelum_wayland::{Anchors, InputRegion, Layer, LayerWindow};
+use slint::{ModelRc, VecModel};
 
 /// Anchors for a strip along `edge`, stretched over its full length.
 pub fn edge_anchors(edge: Edge) -> Anchors {
@@ -38,5 +40,106 @@ pub fn create_bar(
     s.input_region = InputRegion::Full;
     let (window, bar) = component(output_id, s, Bar::new)?;
     theme_bridge::apply(&bar, scheme, cfg);
+    bar.on_activate_workspace(|id| activate_workspace(&id));
     Ok((window, bar))
+}
+
+/// Pushes config switches and KWin state into one output's bar.
+pub fn update(bar: &Bar, cfg: &Config, kwin: Option<&KwinState>, output: &str) {
+    let ws = &cfg.bar.workspaces;
+    bar.set_show_workspaces(ws.enabled && kwin.is_some());
+    bar.set_active_indicator(ws.active_indicator);
+    bar.set_occupied_bg(ws.occupied_bg);
+    bar.set_show_window(cfg.bar.appmenu);
+    let Some(kwin) = kwin else { return };
+    let slots = visible_workspaces(kwin, output, ws);
+    let active = slots.iter().position(|s| s.active).map_or(-1, |i| i as i32);
+    bar.set_workspaces(ModelRc::new(VecModel::from(slots)));
+    bar.set_active_workspace(active);
+    let title = kwin.active_window.as_ref().map(|w| w.title.as_str());
+    bar.set_window_title(title.unwrap_or_default().into());
+}
+
+/// The workspace slots one output's bar shows, as Caelestia's `Workspaces.wsIds`:
+/// with `show_unoccupied`, the page of `shown` slots holding the active desktop;
+/// otherwise up to `shown` occupied desktops ending at (or after) the active one.
+fn visible_workspaces(kwin: &KwinState, output: &str, cfg: &BarWorkspaces) -> Vec<WorkspaceSlot> {
+    let active = kwin.active_by_output.get(output).or(kwin.active.as_ref());
+    let shown = cfg.shown.max(1) as usize;
+    let is_active = |w: &&Workspace| Some(&w.id) == active;
+    let list: Vec<&Workspace> = if cfg.show_unoccupied {
+        let index = kwin
+            .workspaces
+            .iter()
+            .position(|w| is_active(&w))
+            .unwrap_or(0);
+        let start = index / shown * shown;
+        kwin.workspaces.iter().skip(start).take(shown).collect()
+    } else {
+        let list: Vec<_> = kwin
+            .workspaces
+            .iter()
+            .filter(|w| w.occupied || is_active(w))
+            .collect();
+        let Some(index) = list.iter().position(is_active) else {
+            return Vec::new();
+        };
+        let end = (index + 1).max(shown.min(list.len()));
+        list[end.saturating_sub(shown)..end].to_vec()
+    };
+    list.into_iter()
+        .map(|w| WorkspaceSlot {
+            id: w.id.as_str().into(),
+            occupied: w.occupied,
+            active: is_active(&w),
+        })
+        .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn kwin(occupied: &[bool], active: usize) -> KwinState {
+        KwinState {
+            workspaces: occupied
+                .iter()
+                .enumerate()
+                .map(|(i, &occupied)| Workspace {
+                    id: i.to_string(),
+                    name: String::new(),
+                    position: i as u32,
+                    occupied,
+                })
+                .collect(),
+            active: Some(active.to_string()),
+            ..Default::default()
+        }
+    }
+
+    fn ids(slots: &[WorkspaceSlot]) -> Vec<String> {
+        slots.iter().map(|s| s.id.to_string()).collect()
+    }
+
+    #[test]
+    fn pages_of_shown() {
+        let mut cfg = BarWorkspaces {
+            shown: 2,
+            ..Default::default()
+        };
+        let k = kwin(&[false; 5], 3);
+        assert_eq!(ids(&visible_workspaces(&k, "X", &cfg)), ["2", "3"]);
+        cfg.show_unoccupied = false;
+        let k = kwin(&[true, false, true, true, false], 4);
+        // Occupied 0, 2, 3 plus active 4: the last two, ending at the active one.
+        assert_eq!(ids(&visible_workspaces(&k, "X", &cfg)), ["3", "4"]);
+    }
+
+    #[test]
+    fn output_overrides_global_active() {
+        let mut k = kwin(&[false; 3], 0);
+        k.active_by_output.insert("DP-1".into(), "2".into());
+        let slots = visible_workspaces(&k, "DP-1", &BarWorkspaces::default());
+        assert!(slots[2].active && !slots[0].active);
+    }
 }

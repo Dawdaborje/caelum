@@ -1,0 +1,29 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+import { Theme } from "../theme.slint";
+
+// Caelestia's AppMenu pill: the focused window's title on a translucent
+// surface-container pill. shortcut: no app icon until icon lookup lands (03-3/03-4).
+export component ActiveWindow {
+    in property <string> title;
+    in property <length> limit: 400px;
+    property <length> pad: 12px;
+    width: min(root.limit, label.preferred-width + 2 * root.pad);
+    height: 40px;
+    visible: root.title != "";
+
+    Rectangle {
+        background: Theme.surface-container.with-alpha(0.45);
+        border-radius: self.height / 2;
+    }
+    label := Text {
+        x: root.pad;
+        width: parent.width - 2 * root.pad;
+        text: root.title;
+        color: Theme.on-surface;
+        font-family: "Rubik";
+        // Caelestia: textSize = thickness * 0.32.
+        font-size: 13px;
+        overflow: elide;
+        vertical-alignment: center;
+    }
+}

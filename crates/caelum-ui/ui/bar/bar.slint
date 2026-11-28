@@ -1,27 +1,49 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { Theme, Edge } from "../theme.slint";
+import { Workspaces, WorkspaceSlot } from "workspaces.slint";
+import { ActiveWindow } from "active-window.slint";
+
+export { WorkspaceSlot }
 
 // The bar's own surface, laid over the frame's bar edge (Border draws its
-// background, so the two join seamlessly). Widget groups follow Caelestia's
-// BarPlacements: start, centre, end along the bar.
-// shortcut: groups are empty until 03-2 adds widgets; @children can fill only one slot.
+// background, so the two join seamlessly). Widgets follow Caelestia's default
+// entries: workspaces and the app menu at the start; centre and end fill in
+// later tasks.
 export component Bar inherits Window {
     background: transparent;
     in property <Edge> position: Theme.bar-position;
     in property <length> thickness: Theme.bar-thickness;
+
+    in property <bool> show-workspaces: true;
+    in property <[WorkspaceSlot]> workspaces;
+    in property <int> active-workspace: -1;
+    in property <bool> active-indicator: true;
+    in property <bool> occupied-bg: false;
+    callback activate-workspace(string);
+
+    in property <bool> show-window: true;
+    in property <string> window-title;
+
     property <bool> horizontal: root.position == Edge.top || root.position == Edge.bottom;
     property <length> inset: max(8px, Theme.border-thickness);
+    property <length> gap: 8px;
 
-    if root.horizontal: HorizontalLayout {
-        padding: root.inset;
-        HorizontalLayout { alignment: start; }
-        HorizontalLayout { alignment: center; }
-        HorizontalLayout { alignment: end; }
+    ws := Workspaces {
+        x: root.horizontal ? root.inset : (root.width - self.width) / 2;
+        y: root.horizontal ? (root.height - self.height) / 2 : root.inset;
+        visible: root.show-workspaces;
+        horizontal: root.horizontal;
+        slots: root.workspaces;
+        active-index: root.active-workspace;
+        active-indicator: root.active-indicator;
+        occupied-bg: root.occupied-bg;
+        activate(id) => { root.activate-workspace(id); }
     }
-    if !root.horizontal: VerticalLayout {
-        padding: root.inset;
-        VerticalLayout { alignment: start; }
-        VerticalLayout { alignment: center; }
-        VerticalLayout { alignment: end; }
+    // shortcut: horizontal bars only; Caelestia shows just the icon on vertical bars.
+    ActiveWindow {
+        x: root.inset + (root.show-workspaces ? ws.width + root.gap : 0);
+        y: (root.height - self.height) / 2;
+        visible: root.horizontal && root.show-window && self.title != "";
+        title: root.window-title;
     }
 }

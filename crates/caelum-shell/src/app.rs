@@ -3,6 +3,7 @@
 use std::{cell::RefCell, collections::HashMap, path::Path};
 
 use caelum_config::Config;
+use caelum_services::kwin::KwinState;
 use caelum_theme::{Scheme, scheme_or_fallback};
 use caelum_ui::{Background, Bar, Border, Exclusion};
 use caelum_wayland::{
@@ -37,6 +38,8 @@ pub struct App {
     outputs: HashMap<u32, OutputSurfaces>,
     /// Decoded wallpapers by pixel size, so equal outputs share one image.
     wallpapers: HashMap<(u32, u32), Image>,
+    /// Latest workspaces and active window; None until (or unless) KWin reports.
+    kwin: Option<KwinState>,
 }
 
 pub fn init(cfg: Config) {
@@ -47,6 +50,7 @@ pub fn init(cfg: Config) {
         tracker: OutputTracker::default(),
         outputs: HashMap::new(),
         wallpapers: HashMap::new(),
+        kwin: None,
     };
     APP.with(|a| *a.borrow_mut() = Some(app));
 }
@@ -108,8 +112,19 @@ pub fn on_config(cfg: Config) {
             theme_bridge::apply(&o.background.1, &app.scheme, &app.cfg);
             theme_bridge::apply(&o.border.1, &app.scheme, &app.cfg);
             theme_bridge::apply(&o.edges.bar.1, &app.scheme, &app.cfg);
+            app.update_bar(id);
         }
         tracing::info!("config reloaded");
+    });
+}
+
+pub fn on_kwin(state: Option<KwinState>) {
+    with_app(|app| {
+        app.kwin = state;
+        let ids: Vec<u32> = app.outputs.keys().copied().collect();
+        for id in ids {
+            app.update_bar(id);
+        }
     });
 }
 
@@ -157,7 +172,14 @@ impl App {
             },
         );
         self.set_wallpaper(id);
+        self.update_bar(id);
         Ok(())
+    }
+
+    fn update_bar(&self, id: u32) {
+        if let (Some(o), Some(info)) = (self.outputs.get(&id), self.tracker.info(id)) {
+            bar::update(&o.edges.bar.1, &self.cfg, self.kwin.as_ref(), &info.name);
+        }
     }
 
     /// The bar reserves its own edge; the other edges reserve the border thickness.

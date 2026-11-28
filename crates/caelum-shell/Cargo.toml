@@ -8,10 +8,12 @@ publish.workspace = true
 
 [dependencies]
 caelum-config = { path = "../caelum-config" }
+caelum-services = { path = "../caelum-services" }
 caelum-theme = { path = "../caelum-theme" }
 caelum-ui = { path = "../caelum-ui" }
 caelum-wayland = { path = "../caelum-wayland" }
 slint.workspace = true
 image = { version = "0.25", default-features = false, features = ["png", "jpeg"] }
+tokio = { version = "1", features = ["rt", "sync"] }
 tracing = "0.1"
 tracing-subscriber = "0.3"
