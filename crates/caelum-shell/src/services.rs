@@ -7,7 +7,11 @@ use caelum_services::{
     Service, ServiceError, audio::AudioService, battery::BatteryService,
     bluetooth::BluetoothService, kwin::KwinService, network::NetworkService, tray::TrayService,
 };
-use tokio::{runtime::Handle, sync::watch};
+use caelum_shell::ipc;
+use tokio::{
+    runtime::Handle,
+    sync::{mpsc, watch},
+};
 
 use crate::app;
 
@@ -34,10 +38,41 @@ pub fn start() -> std::io::Result<()> {
                 spawn(BatteryService::default(), |s| {
                     app::on_status(|st| st.battery = s)
                 });
+                commands();
                 std::future::pending::<()>().await
             })
         })?;
     Ok(())
+}
+
+/// The shell's D-Bus interface and global shortcuts, both feeding commands to
+/// the UI thread.
+fn commands() {
+    let (tx, mut rx) = mpsc::unbounded_channel();
+    let ipc_tx = tx.clone();
+    tokio::spawn(async move {
+        let served = match zbus::Connection::session().await {
+            Ok(conn) => ipc::serve(conn, ipc_tx).await,
+            Err(e) => Err(e),
+        };
+        match served {
+            // The connection answers calls for as long as it is alive.
+            Ok(_conn) => std::future::pending::<()>().await,
+            Err(e) => tracing::warn!("D-Bus interface {}: {e}", ipc::NAME),
+        }
+    });
+    tokio::spawn(async move {
+        if let Err(e) = crate::shortcuts::run(tx).await {
+            tracing::warn!("global shortcuts unavailable: {e}");
+        }
+    });
+    tokio::spawn(async move {
+        while let Some(cmd) = rx.recv().await {
+            if let Err(e) = slint::invoke_from_event_loop(move || app::on_command(cmd)) {
+                tracing::warn!("forward command: {e}");
+            }
+        }
+    });
 }
 
 /// Runs a one-off request (a click's D-Bus call) on the services thread.

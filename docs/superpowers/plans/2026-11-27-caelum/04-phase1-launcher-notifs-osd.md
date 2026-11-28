@@ -19,9 +19,9 @@ Read `00-overview.md`, `02-…` and `03-…` (the `Service` pattern) first.
   - `pub enum Drawer { Launcher, Session, Dashboard, Sidebar }` with `FromStr`. `ipc.rs` sends `DrawerCommand { drawer: Drawer, action: Toggle|Open|Close }` into the UI thread.
   - CLI: `caelum toggle launcher`, which calls the method above.
   - `shortcuts.rs` registers global shortcuts with `org.kde.kglobalaccel` (component `caelum`) the same way `globalshortcut.cpp` does, with Caelestia's default keys from `Config/keybindsdefaults.hpp`.
-- [ ] **Step 1: Write failing tests** (private dbus-daemon): `toggle_known_drawer_sends_command` (Toggle("launcher") gives one `DrawerCommand{Launcher, Toggle}` on the channel) and `unknown_drawer_is_dbus_error`.
-- [ ] **Step 2–4:** Fail, implement, pass.
-- [ ] **Step 5: Verify:** `caelum toggle launcher` in the nested session logs the command. **Commit:** `git commit -m "Shell D-Bus interface, CLI, global shortcuts"`
+- [x] **Step 1: Write failing tests** (private dbus-daemon): `toggle_known_drawer_sends_command` (Toggle("launcher") gives one `DrawerCommand{Launcher, Toggle}` on the channel) and `unknown_drawer_is_dbus_error`.
+- [x] **Step 2–4:** Fail, implement, pass.
+- [x] **Step 5: Verify:** `caelum toggle launcher` in the nested session logs the command. **Commit:** `git commit -m "Shell D-Bus interface, CLI, global shortcuts"`
 
 ### Task 04-2: Drawer mechanics and launcher
 

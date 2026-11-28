@@ -542,6 +542,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "caelum-ctl"
+version = "0.1.0"
+dependencies = [
+ "tokio",
+ "zbus",
+]
+
+[[package]]
 name = "caelum-services"
 version = "0.1.0"
 dependencies = [
@@ -568,11 +576,13 @@ dependencies = [
  "caelum-ui",
  "caelum-wayland",
  "chrono",
+ "futures-util",
  "image",
  "slint",
  "tokio",
  "tracing",
  "tracing-subscriber",
+ "zbus",
 ]
 
 [[package]]

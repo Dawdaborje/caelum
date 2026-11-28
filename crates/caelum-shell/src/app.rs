@@ -229,6 +229,22 @@ where
     with_app(|app| theme_bridge::apply(ui, &app.scheme, &app.cfg));
 }
 
+/// A command from the D-Bus interface or a global shortcut.
+pub fn on_command(cmd: caelum_shell::ipc::Command) {
+    use caelum_shell::ipc::Command;
+    match cmd {
+        // shortcut: drawers arrive in 04-2; until then the command is only logged.
+        Command::Drawer(c) => tracing::info!("drawer command: {c:?}"),
+        Command::Reload => {
+            tracing::info!("reload requested");
+            match caelum_config::load(&caelum_config::config_path()) {
+                Ok(cfg) => on_config(cfg),
+                Err(e) => tracing::warn!("reload: {e}"),
+            }
+        }
+    }
+}
+
 pub fn on_kwin(state: Option<KwinState>) {
     with_app(|app| {
         app.kwin = state;
