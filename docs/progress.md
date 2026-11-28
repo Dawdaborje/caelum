@@ -20,7 +20,7 @@ commit that finishes it, adding the short SHA.
 - [x] 03-1 Bar window and layout (16bc22b)
 - [x] 03-2 Workspaces and active window (4fe75e6)
 - [x] 03-3 Clock and OS icon (79a16d8)
-- [ ] 03-4 Tray
+- [x] 03-4 Tray (e6c8df3)
 - [ ] 03-5 Status icons
 - [ ] 03-6 Bar memory check
 
